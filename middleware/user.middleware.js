@@ -4,10 +4,10 @@ const user = require('../sampleData/user.json');
 
 dotenv.config();
 
-exports.verifyAdmin = (req, res, next) => {
+exports.verifyUser = (req, res, next) => {
   try {
     const { envtoken } = process.env;
-    const token = req?.headers?.authorization;
+    const token = req.headers.authorization;
 
     if (token) {
       const base64String = token.split('.')[1];
@@ -16,7 +16,6 @@ exports.verifyAdmin = (req, res, next) => {
       try {
         const decodedId = jwt.verify(token, envtoken);
         const userData = user.find((value) => value.id === decodedId.id);
-
         if (userData) {
           next();
         } else {
