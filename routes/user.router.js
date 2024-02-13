@@ -6,9 +6,7 @@ const { verifyUser } = require('../middleware/user.middleware');
 
 const router = express.Router();
 router.post('/loginuser', userController.login);
-router.post('/add', verifyUser, userAuthController.addUser);
 router.get('/get', verifyUser, userAuthController.getuser);
+router.get('/getone/:id', verifyUser, userAuthController.getone);
 router.put('/update/:id', verifyUser, userAuthController.updateUser);
-router.delete('/delete/:id', verifyUser, userAuthController.deleteUser);
-
 module.exports = router;

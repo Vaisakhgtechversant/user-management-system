@@ -2,7 +2,6 @@ const Joi = require('@hapi/joi');
 const userData = require('../sampleData/user.json');
 
 const authSchema = Joi.object({
-  id: Joi.number().required(),
   username: Joi.string().min(2),
   email: Joi.string().email().lowercase().required(),
   password: Joi.string().min(2).required(),
@@ -16,13 +15,13 @@ exports.addUser = (req, res) => {
     if (error) {
       return res.status(400).send(error.details[0].message);
     }
-    if (req.body.role !== 'admin') {
+    if (req.body.role !== 'admin' && req.body.role !== 'agent' && req.body.role !== 'supervisor' && req.body.role !== 'qa' && req.body.role !== 'qc') {
       return res.status(403).json({
         status: 'false',
-        message: 'Access denied. Only admins can perform this action',
+        message: 'Unauthorized role',
       });
     }
-    const newUser = req.body;
+    const newUser = { id: userData.length + 1, ...req.body };
     const emailExist = userData.find((value) => value.email === newUser.email);
     if (emailExist) {
       return res.status(400).json({
@@ -68,12 +67,6 @@ exports.updateUser = (req, res) => {
     const userId = Number(req.params.id);
     const updateUser = req.body;
     const index = userData.findIndex((data) => data.id === userId);
-    if (req.body.role !== 'admin') {
-      res.status(403).json({
-        status: 'false',
-        message: 'Access denied. Only admins can perform this action',
-      });
-    }
     console.log(index);
     if (index !== -1) {
       userData[index] = { ...userData[index], ...updateUser };

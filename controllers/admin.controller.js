@@ -10,7 +10,6 @@ const { envtoken } = process.env;
 const authSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),
   password: Joi.string().min(2).required(),
-  role: Joi.string().required(),
 
 });
 
@@ -19,12 +18,6 @@ exports.login = (req, res) => {
     const { error } = authSchema.validate(req.body);
     if (error) {
       return res.status(400).send(error.details[0].message);
-    }
-    if (req.body.role !== 'admin') {
-      return res.status(403).json({
-        status: 'false',
-        message: 'Access denied. Only admins can perform this action',
-      });
     }
     const { email, password } = req.body;
     const result = adminData.find((data) => data.email === email);

@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const adminRouter = require('./routes/admin.router');
 const userRouter = require('./routes/user.router');
+const imgRouter = require('./routes/img.router');
 
 dotenv.config();
 const server = express();
@@ -12,6 +13,8 @@ server.listen(8000, () => {
 });
 server.use('/admin', adminRouter);
 server.use('/user', userRouter);
+server.use('/img', imgRouter);
+
 // set page not found
 server.use('*', (req, res) => {
   res.send('Page Not Found ');
