@@ -1,3 +1,4 @@
+const Joi = require('@hapi/joi');
 const userData = require('../sampleData/user.json');
 
 exports.getuser = (req, res) => {
@@ -11,6 +12,7 @@ exports.getuser = (req, res) => {
     });
   }
 };
+
 exports.getone = (req, res) => {
   try {
     const userId = Number(req.params.id);
@@ -28,6 +30,7 @@ exports.getone = (req, res) => {
     });
   }
 };
+
 exports.updateUser = (req, res) => {
   try {
     const userId = Number(req.params.id);
@@ -55,6 +58,37 @@ exports.updateUser = (req, res) => {
     res.status(400).json({
       status: 'false',
       message: 'Internal Server Error',
+    });
+  }
+};
+
+exports.updatePassword = (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { password } = req.body;
+    const userToUpdate = userData.find((user) => user.id === userId);
+    if (!userToUpdate) {
+      return res.status(400).json({
+        status: false,
+        message: 'User Not Found',
+      });
+    }
+    const { error } = Joi.string().min(8).validate(password);
+    if (error) {
+      return res.status(400).json({
+        status: false,
+        send: error.details[0].message,
+      });
+    }
+    userToUpdate.password = password;
+    return res.status(200).json({
+      status: true,
+      message: 'Password updated',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal server error',
     });
   }
 };

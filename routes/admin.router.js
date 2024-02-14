@@ -10,4 +10,6 @@ router.get('/getUser', verifyAdmin, adminCanController.getuser);
 router.put('/update/:id', verifyAdmin, adminCanController.updateUser);
 router.delete('/delete/:id', verifyAdmin, adminCanController.deleteUser);
 
+// Refresh Token
+router.post('/refresh-token', adminController.refreshtoken);
 module.exports = router;

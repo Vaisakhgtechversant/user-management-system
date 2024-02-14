@@ -4,9 +4,8 @@ const userData = require('../sampleData/user.json');
 const authSchema = Joi.object({
   username: Joi.string().min(2),
   email: Joi.string().email().lowercase().required(),
-  password: Joi.string().min(2).required(),
+  password: Joi.string().min(8).required(),
   role: Joi.string().required(),
-
 });
 
 exports.addUser = (req, res) => {
@@ -15,7 +14,7 @@ exports.addUser = (req, res) => {
     if (error) {
       return res.status(400).send(error.details[0].message);
     }
-    if (req.body.role !== 'admin' && req.body.role !== 'agent' && req.body.role !== 'supervisor' && req.body.role !== 'qa' && req.body.role !== 'qc') {
+    if (req.body.role !== 'agent' && req.body.role !== 'supervisor' && req.body.role !== 'qa' && req.body.role !== 'qc') {
       return res.status(403).json({
         status: 'false',
         message: 'Unauthorized role',

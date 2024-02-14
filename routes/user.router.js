@@ -9,4 +9,5 @@ router.post('/loginuser', userController.login);
 router.get('/get', verifyUser, userAuthController.getuser);
 router.get('/getone/:id', verifyUser, userAuthController.getone);
 router.put('/update/:id', verifyUser, userAuthController.updateUser);
+router.put('/updatePassword/:id', verifyUser, userAuthController.updatePassword);
 module.exports = router;
