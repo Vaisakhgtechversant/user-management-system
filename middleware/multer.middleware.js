@@ -1,5 +1,6 @@
 const multer = require('multer');
 const path = require('path');
+const sharp = require('sharp');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -8,7 +9,6 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const fileExtension = path.extname(file.originalname);
     const fileName = 'Image';
-    // Construct the filename with the date and the original file extension
     const newFileName = `${fileName}-${Date.now()}${fileExtension}`;
     req.body.filename = newFileName;
     cb(null, newFileName);
@@ -27,12 +27,32 @@ const upload = multer({
   },
 });
 
-const UploadPostImage = upload.array('PostImage');
+const resizeImage = async (req, res, next) => {
+  if (!req.files || !req.files.length) {
+    next();
+  }
+
+  try {
+    const resizePromises = req.files.map(async (file) => {
+      const resizedImageBuffer = await sharp(file.path)
+        .resize(200, 200, { fit: 'inside' })
+        .toBuffer();
+      console.log('resize');
+      const updatedFile = {
+        ...file,
+        buffer: resizedImageBuffer,
+      };
+      const index = req.files.indexOf(file);
+      req.files[index] = updatedFile;
+    });
+    await Promise.all(resizePromises);
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
 const UploadImage = upload.array('image');
-const UploadProfileImage = upload.array('image');
 
 module.exports = {
-  UpdateGroupImage: UploadImage,
-  UploadPost: UploadPostImage,
-  UploadImage: UploadProfileImage,
+  UploadImage, resizeImage,
 };
