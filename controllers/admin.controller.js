@@ -6,7 +6,6 @@ const adminData = require('../sampleData/admin.json');
 dotenv.config();
 
 const { envtoken, REFRESH_TOKEN_SECRET } = process.env;
-
 const authSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),
   password: Joi.string().min(8).required(),
@@ -22,7 +21,7 @@ exports.login = (req, res) => {
     const { email, password } = req.body;
     const result = adminData.find((data) => data.email === email);
     if (result && result.password === password) {
-      const token = jwt.sign({ id: result.id }, envtoken, { expiresIn: '15m' });
+      const token = jwt.sign({ id: result.id, name: result.name, role: result.role }, envtoken, { expiresIn: '15m' });
       const refreshToken = jwt.sign({ id: result.id }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
       return res.status(200).json({
         status: 'true',

@@ -2,11 +2,6 @@
     "id":1,
     "name":"test1",
     "email":"test1@gmail.com",
-    "password":"test@123"
-},
-{
-    "id":2,
-    "name":"test2",
-    "email":"test2@gmail.com",
-    "password":"test@1234"
+    "password":"test1@12345",
+    "role":"admin"
 }]

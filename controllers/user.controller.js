@@ -6,7 +6,6 @@ const userData = require('../sampleData/user.json');
 const authSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),
   password: Joi.string().min(8).required(),
-  role: Joi.string().required(),
 });
 dotenv.config();
 const { envtoken, REFRESH_TOKEN_SECRET } = process.env;
@@ -17,16 +16,13 @@ exports.login = (req, res) => {
     if (error) {
       return res.status(400).send(error.details[0].message);
     }
-    if (req.body.role !== 'agent' && req.body.role !== 'supervisor' && req.body.role !== 'qa' && req.body.role !== 'qc') {
-      return res.status(403).json({
-        status: 'false',
-        message: 'Unauthorized role',
-      });
-    }
+
     const { email, password } = req.body;
     const result = userData.find((data) => data.email === email);
+    console.log('result:', result);
     if (result && result.password === password) {
-      const token = jwt.sign({ id: result.id }, envtoken);
+      console.log('result:', result);
+      const token = jwt.sign({ id: result.id, role: result.role }, envtoken);
       const refreshToken = jwt.sign({ id: result.id }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
       return res.status(200).json({
         status: 'true',

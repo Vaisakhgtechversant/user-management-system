@@ -1,18 +1,6 @@
 const Joi = require('@hapi/joi');
 const userData = require('../sampleData/user.json');
 
-exports.getuser = (req, res) => {
-  try {
-    res.send(userData);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: 'false',
-      message: 'Internal Server Error',
-    });
-  }
-};
-
 exports.getone = (req, res) => {
   try {
     const userId = Number(req.params.id);

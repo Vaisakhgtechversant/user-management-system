@@ -91,12 +91,6 @@ exports.deleteUser = (req, res) => {
   try {
     const userId = Number(req.params.id);
     const indexToRemove = userData.findIndex((user) => user.id === userId);
-    if (req.body.role !== 'admin') {
-      res.status(403).json({
-        status: 'false',
-        message: 'Access denied. Only admins can perform this action',
-      });
-    }
     if (indexToRemove !== -1) {
       userData.splice(indexToRemove, 1);
       return res.status(200).json({
