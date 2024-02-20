@@ -30,6 +30,6 @@ exports.verifyAdmin = (req, res, next) => {
     }
   } catch (error) {
     console.log('Error:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send('Token missing or invalid');
   }
 };

@@ -2,7 +2,8 @@ const Joi = require('@hapi/joi');
 const userData = require('../sampleData/user.json');
 
 const authSchema = Joi.object({
-  username: Joi.string().min(2),
+  firstname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('First name must contain only alphabetic characters'),
+  lastname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('Second name must contain only alphabetic characters'),
   email: Joi.string().email().lowercase().required(),
   password: Joi.string().min(8).required(),
   role: Joi.string().required(),
@@ -44,7 +45,7 @@ exports.addUser = (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 'false',
-      message: 'Internal Server Error',
+      message: 'Token missing or invalid',
     });
   }
 };
@@ -54,9 +55,9 @@ exports.getuser = (req, res) => {
     res.send(userData);
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    res.status(400).json({
       status: 'false',
-      message: 'Internal Server Error',
+      message: 'Token is missing',
     });
   }
 };
@@ -65,6 +66,13 @@ exports.updateUser = (req, res) => {
   try {
     const userId = Number(req.params.id);
     const updateUser = req.body;
+    const { error } = authSchema.validate(updateUser);
+    if (error) {
+      res.status(400).json({
+        status: 'false',
+        message: error.details[0].message,
+      });
+    }
     const index = userData.findIndex((data) => data.id === userId);
     console.log(index);
     if (index !== -1) {

@@ -7,7 +7,7 @@ exports.verifyUserRole = async (req, res, next) => {
     console.log('Inside middleware');
 
     // Extract token from headers
-    const token = req?.headers?.authorization;
+    const token = req.headers.authorization;
     console.log('Token:', token);
     const { genericvalue } = req.headers;
     console.log(genericvalue);
@@ -32,7 +32,7 @@ exports.verifyUserRole = async (req, res, next) => {
         }
       } catch (jsonParseError) {
         console.error('JSON Parsing Error:', jsonParseError);
-        res.status(500).send('Internal Server Error');
+        res.status(500).send('Token missing or invalid');
       }
     } else {
       res.status(403).send('choose generic  value');
