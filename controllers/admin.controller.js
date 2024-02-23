@@ -28,6 +28,7 @@ exports.login = (req, res) => {
         message: 'successfully logging',
         access_token: token,
         refresh_token: refreshToken,
+        role: result.role,
       });
     }
     return res.status(400).json({

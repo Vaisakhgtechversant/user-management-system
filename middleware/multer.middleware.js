@@ -21,7 +21,7 @@ const upload = multer({
   },
 });
 
-const UploadImage = upload.array('image');
+const UploadImage = upload.single('image');
 
 module.exports = {
   UploadImage,

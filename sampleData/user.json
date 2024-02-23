@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "id": 1,
+    "firstname": "tested",
+    "lastname": "tested",
+    "email": "tested@gmail.com",
+    "password": "tested@12345",
+    "role": "supervisor"
+  },
+  {
+    "id": 2,
+    "firstname": "Demo",
+    "lastname": "demo",
+    "email": "s@gmail.com",
+    "password": "demo1@ddd",
+    "role": "agent"
+  },
+  {
+    "id": 3,
+    "firstname": "Demo",
+    "lastname": "demo",
+    "email": "ddds@gmail.com",
+    "password": "demo1@ddd",
+    "role": "agent"
+  },
+  {
+    "id": 4,
+    "firstname": "Demo",
+    "lastname": "demo",
+    "email": "dddds@gmail.com",
+    "password": "demo1@ddd",
+    "role": "agent"
+  },
+  {
+    "id": 5,
+    "firstname": "Demo",
+    "lastname": "demo",
+    "email": "dddsds@gmail.com",
+    "password": "demo1@ddd",
+    "role": "agent"
+  }
+]

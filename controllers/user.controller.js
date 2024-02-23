@@ -19,7 +19,7 @@ exports.login = (req, res) => {
 
     const { email, password } = req.body;
     const result = userData.find((data) => data.email === email);
-    console.log('result:', result);
+    console.log('userData:', userData);
     if (result && result.password === password) {
       console.log('result:', result);
       const token = jwt.sign({ id: result.id, role: result.role }, envtoken);

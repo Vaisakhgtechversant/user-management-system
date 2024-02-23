@@ -1,5 +1,6 @@
 const Joi = require('@hapi/joi');
 const userData = require('../sampleData/user.json');
+const writeUsers = require('../sampleData/write.user');
 
 const authSchema = Joi.object({
   firstname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('First name must contain only alphabetic characters')
@@ -41,6 +42,7 @@ exports.updateUser = (req, res) => {
     console.log(index);
     if (index !== -1) {
       userData[index] = { ...userData[index], ...updateUser };
+      writeUsers(userData);
       res.status(200).json({
         status: 'true',
         message: 'Updated',
@@ -85,6 +87,7 @@ exports.updatePassword = (req, res) => {
       });
     }
     userToUpdate.password = password;
+    writeUsers(userData);
     return res.status(200).json({
       status: true,
       message: 'Password updated',

@@ -7,5 +7,4 @@ const UploadPost = require('../middleware/multer.middleware');
 
 router.post('/import', UploadPost.UploadImage, imgController.saveBlog);
 router.get('/export/:filename', imgController.getimage);
-router.put('/update/:filename', imgController.updateImage);
 module.exports = router;

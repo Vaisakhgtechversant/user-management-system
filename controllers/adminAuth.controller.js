@@ -1,12 +1,13 @@
 const Joi = require('@hapi/joi');
 const userData = require('../sampleData/user.json');
+const writeUsers = require('../sampleData/write.user');
 
 const authSchema = Joi.object({
   firstname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('First name must contain only alphabetic characters'),
-  lastname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('Second name must contain only alphabetic characters'),
+  lastname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('Last name must contain only alphabetic characters'),
   email: Joi.string().email().lowercase().required(),
   password: Joi.string().min(8).required(),
-  role: Joi.string().required(),
+  role: Joi.string().required().valid('agent', 'supervisor', 'qa', 'qc'),
 });
 
 exports.addUser = (req, res) => {
@@ -37,6 +38,7 @@ exports.addUser = (req, res) => {
       });
     }
     userData.push(newUser);
+    writeUsers(userData);
     return res.status(200).json({
       status: 'true',
       message: 'New User Added',
@@ -46,18 +48,6 @@ exports.addUser = (req, res) => {
     return res.status(500).json({
       status: 'false',
       message: 'Token missing or invalid',
-    });
-  }
-};
-
-exports.getuser = (req, res) => {
-  try {
-    res.send(userData);
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({
-      status: 'false',
-      message: 'Token is missing',
     });
   }
 };
@@ -77,6 +67,7 @@ exports.updateUser = (req, res) => {
     console.log(index);
     if (index !== -1) {
       userData[index] = { ...userData[index], ...updateUser };
+      writeUsers(userData);
       res.status(200).json({
         status: 'true',
         message: 'Updated',
@@ -101,6 +92,7 @@ exports.deleteUser = (req, res) => {
     const indexToRemove = userData.findIndex((user) => user.id === userId);
     if (indexToRemove !== -1) {
       userData.splice(indexToRemove, 1);
+      writeUsers(userData);
       return res.status(200).json({
         status: 'true',
         message: 'User Deleted',
@@ -115,6 +107,18 @@ exports.deleteUser = (req, res) => {
     return res.status(500).json({
       status: 'false',
       message: 'Internal Server Error',
+    });
+  }
+};
+
+exports.getuser = (req, res) => {
+  try {
+    res.send(userData);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      status: 'false',
+      message: 'Token is missing',
     });
   }
 };

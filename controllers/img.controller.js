@@ -25,34 +25,3 @@ exports.getimage = ((req, res) => {
     return fileStream.pipe(res);
   });
 });
-
-exports.updateImage = (req, res) => {
-  try {
-    const fileName = req.params.filename;
-    const filePath = path.join(__dirname, 'images', fileName);
-
-    // Check if the file exists
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-      if (err) {
-        res.status(404).send('File not found');
-      }
-
-      // Get the updated image data from the request body
-      const { imageData } = req.body;
-
-      // Write the updated image data to the file
-      fs.writeFile(filePath, imageData, (writeErr) => {
-        if (writeErr) {
-          console.error(writeErr);
-          res.status(500).send('Failed to update image');
-        }
-
-        // Image updated successfully
-        res.status(200).send('Image updated successfully');
-      });
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
-  }
-};
