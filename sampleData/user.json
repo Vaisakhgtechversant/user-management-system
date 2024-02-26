@@ -38,5 +38,13 @@
     "email": "dddsds@gmail.com",
     "password": "demo1@ddd",
     "role": "agent"
+  },
+  {
+    "id": 6,
+    "firstname": "vaisakh",
+    "lastname": "deGGmo",
+    "email": "vaisakhg@techversantinfotech.com",
+    "password": "qweerttqqq",
+    "role": "agent"
   }
 ]
