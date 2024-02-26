@@ -1,8 +1,11 @@
+const jwt = require('jsonwebtoken');
 const Joi = require('@hapi/joi');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
 const userData = require('../sampleData/user.json');
 const writeUsers = require('../sampleData/write.user');
+
+const { envtoken } = process.env;
 
 let newOtp = null;
 const authSchema = Joi.object({
@@ -139,6 +142,10 @@ exports.sendOtp = async (req, res) => {
         res.send('otp  sended successfully');
       }
     });
+    return res.status(200).json({
+      status: true,
+      message: 'otp  sended successfully',
+    });
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -148,40 +155,68 @@ exports.sendOtp = async (req, res) => {
   }
 };
 
-exports.changepassword = async (req, res) => {
+exports.verifyotp = async (req, res) => {
   try {
     const userId = Number(req.params.id);
-    const { password, otp } = req.body;
-
-    const userToUpdate = userData.find((user) => user.id === userId);
-    if (!userToUpdate) {
-      return res.status(400).json({
-        status: false,
-        message: 'User Not Found',
-      });
-    }
+    const { otp } = req.body;
     if (otp !== newOtp) {
       return res.status(400).send('Invalid OTP');
     }
-    const { error } = Joi.string().min(8).validate(password);
-    if (error) {
-      return res.status(400).json({
-        status: false,
-        message: error.details[0].message,
+    const result = userData.find((data) => data.id === userId);
+    if (result) {
+      const token = jwt.sign({ id: result.id, name: result.name, role: result.role }, envtoken, { expiresIn: '15m' });
+
+      return res.status(200).json({
+        status: 'true',
+        message: 'Token verified',
+        access_token: token,
+        role: result.role,
       });
     }
-    userToUpdate.password = password;
     // Clear the OTP
-    newOtp = null;
-    writeUsers(userData);
-    console.log('Password updated successfully');
-    return res.status(200).send('Password updated successfully');
+    return res.status(200).send('Token verified');
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       status: false,
       message: 'Internal server error',
       error: error.message,
+    });
+  }
+};
+
+exports.changepassword = (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { password } = req.body;
+    const { err } = authSchema.validate(password);
+    if (err) {
+      res.status(400).json({
+        status: false,
+        message: err.details[0].message,
+      });
+    }
+    const updatePassword = userData.find((data) => data.id === userId);
+    if (!updatePassword) {
+      return res.status(400).json({
+        status: false,
+        message: 'User Not Found',
+      });
+    }
+    const { error } = Joi.string().min(8).validate(password);
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+    updatePassword.password = password;
+    writeUsers(userData);
+    return res.status(200).json({
+      status: true,
+      message: 'Password Changed',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal Server Error',
     });
   }
 };
