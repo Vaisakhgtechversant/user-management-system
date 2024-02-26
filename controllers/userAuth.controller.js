@@ -1,7 +1,10 @@
 const Joi = require('@hapi/joi');
+const nodemailer = require('nodemailer');
+const otpGenerator = require('otp-generator');
 const userData = require('../sampleData/user.json');
 const writeUsers = require('../sampleData/write.user');
 
+let newOtp = null;
 const authSchema = Joi.object({
   firstname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('First name must contain only alphabetic characters')
     .required(),
@@ -96,6 +99,89 @@ exports.updatePassword = (req, res) => {
     return res.status(500).json({
       status: false,
       message: 'Internal server error',
+    });
+  }
+};
+
+exports.sendOtp = async (req, res) => {
+  try {
+    newOtp = await otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+      alphabets: false,
+    });
+    const userId = Number(req.params.id);
+    const { email } = req.body;
+    const userToUpdate = userData.find((user) => user.id === userId);
+    if (!userToUpdate) {
+      return res.status(400).json({
+        status: false,
+        message: 'User Not Found',
+      });
+    }
+    const transporter = await nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'vaisakhg30@gmail.com',
+        pass: 'oiadmibebbronett',
+      },
+    });
+    const mailOptions = {
+      from: 'ums@gmail.com',
+      to: email,
+      subject: 'OTP to reset password',
+      text: newOtp,
+    };
+    transporter.sendMail(mailOptions, (error) => {
+      if (error) {
+        res.status(401).send(error);
+      } else {
+        res.send('otp  sended successfully');
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal server error',
+      error,
+    });
+  }
+};
+
+exports.changepassword = async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { password, otp } = req.body;
+
+    const userToUpdate = userData.find((user) => user.id === userId);
+    if (!userToUpdate) {
+      return res.status(400).json({
+        status: false,
+        message: 'User Not Found',
+      });
+    }
+    if (otp !== newOtp) {
+      return res.status(400).send('Invalid OTP');
+    }
+    const { error } = Joi.string().min(8).validate(password);
+    if (error) {
+      return res.status(400).json({
+        status: false,
+        message: error.details[0].message,
+      });
+    }
+    userToUpdate.password = password;
+    // Clear the OTP
+    newOtp = null;
+    writeUsers(userData);
+    console.log('Password updated successfully');
+    return res.status(200).send('Password updated successfully');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: false,
+      message: 'Internal server error',
+      error: error.message,
     });
   }
 };
