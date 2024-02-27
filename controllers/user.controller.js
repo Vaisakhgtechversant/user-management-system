@@ -23,7 +23,7 @@ exports.login = (req, res) => {
     if (result && result.password === password) {
       console.log('result:', result);
       const token = jwt.sign({ id: result.id, role: result.role }, envtoken);
-      const refreshToken = jwt.sign({ id: result.id }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+      const refreshToken = jwt.sign({ id: result.id }, REFRESH_TOKEN_SECRET, { expiresIn: '1hr' });
       return res.status(200).json({
         status: 'true',
         message: 'successfully logging',

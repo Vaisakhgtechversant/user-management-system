@@ -8,13 +8,69 @@ const writeUsers = require('../sampleData/write.user');
 const { envtoken } = process.env;
 
 let newOtp = null;
-const authSchema = Joi.object({
+const authSchemas = Joi.object({
   firstname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('First name must contain only alphabetic characters')
     .required(),
-  lastname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('Second name must contain only alphabetic characters')
+  lastname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('Last name must contain only alphabetic characters')
     .required(),
 });
-
+exports.addNewUser = (req, res) => {
+  try {
+    const authSchema = Joi.object({
+      firstname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('First name must contain only alphabetic characters')
+        .required(),
+      lastname: Joi.string().min(2).pattern(/^[a-zA-Z]+$/).message('Last name must contain only alphabetic characters')
+        .required(),
+      email: Joi.string().email().lowercase().required(),
+      password: Joi.string().min(8).required(),
+      role: Joi.string().required(),
+    });
+    const { error } = authSchema.validate(req.body);
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+    const { email, password, role } = req.body;
+    if (!email || !password || !role) {
+      return res.status(400).json({
+        status: 'false',
+        message: 'Email, password, and role are required',
+      });
+    }
+    if (req.body.role !== 'agent') {
+      return res.status(403).json({
+        status: 'false',
+        message: 'Unauthorized role',
+      });
+    }
+    const newUser = { id: userData.length + 1, ...req.body };
+    const emailExist = userData.find((value) => value.email === newUser.email);
+    if (emailExist) {
+      return res.status(400).json({
+        status: 'false',
+        message: 'Email is already exist',
+      });
+    }
+    const idExist = userData.find((value) => value.id === newUser.id);
+    if (idExist) {
+      return res.status(400).json({
+        status: 'false',
+        message: 'Id is already exist',
+      });
+    }
+    userData.push(newUser);
+    writeUsers(userData);
+    return res.status(200).json({
+      status: 'true',
+      message: 'New User Added',
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 'false',
+      message: 'Token missing or invalid',
+    });
+  }
+};
 exports.getone = (req, res) => {
   try {
     const userId = Number(req.params.id);
@@ -37,7 +93,7 @@ exports.updateUser = (req, res) => {
   try {
     const userId = Number(req.params.id);
     const updateUser = req.body;
-    const { error } = authSchema.validate(updateUser);
+    const { error } = authSchemas.validate(updateUser);
     if (error) {
       res.status(400).json({
         status: 'false',
@@ -71,7 +127,7 @@ exports.updatePassword = (req, res) => {
   try {
     const userId = Number(req.params.id);
     const { password } = req.body;
-    const { err } = authSchema.validate(password);
+    const { err } = authSchemas.validate(password);
     if (err) {
       res.status(400).json({
         status: 'false',
@@ -189,7 +245,7 @@ exports.changepassword = (req, res) => {
   try {
     const userId = Number(req.params.id);
     const { password } = req.body;
-    const { err } = authSchema.validate(password);
+    const { err } = authSchemas.validate(password);
     if (err) {
       res.status(400).json({
         status: false,

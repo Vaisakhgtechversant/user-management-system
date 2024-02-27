@@ -11,8 +11,8 @@ const server = express();
 server.use(bodyParser.json());
 server.use(cors({ origin: 'http:/localhost:3000' }));
 
-server.listen(3000, () => {
-  console.log('server is running');
+server.listen(8000, () => {
+  console.log('Server is running at port number 8000');
 });
 server.use('/admin', adminRouter);
 server.use('/user', userRouter);

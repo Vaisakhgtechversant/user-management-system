@@ -1,7 +1,7 @@
 [{
     "id":1,
-    "name":"test1",
-    "email":"test1@gmail.com",
-    "password":"test1@12345",
+    "name":"admin",
+    "email":"admin@gmail.com",
+    "password":"admin@12345",
     "role":"admin"
 }]

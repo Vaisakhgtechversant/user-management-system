@@ -2,8 +2,16 @@
   {
     "id": 1,
     "firstname": "vaisakh",
-    "lastname": "deGGmo",
+    "lastname": "ggg",
     "email": "vaisakhg@techversantinfotech.com",
+    "password": "12345678qwer",
+    "role": "qa"
+  },
+  {
+    "id": 2,
+    "firstname": "vaisakh",
+    "lastname": "deGGmo",
+    "email": "vaisakhsg@techversantinfotech.com",
     "password": "password123",
     "role": "agent"
   }
