@@ -6,6 +6,7 @@ const { verifyAdmin } = require('../middleware/admin.middleware');
 
 const router = express.Router();
 router.post('/login', adminController.login);
+
 router.post('/user', verifyUserRole, verifyAdmin, adminCanController.addUser);
 router.get('/users', verifyUserRole, verifyAdmin, adminCanController.getuser);
 router.put('/update/:id', verifyUserRole, verifyAdmin, adminCanController.updateUser);

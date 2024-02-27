@@ -25,7 +25,7 @@ exports.login = (req, res) => {
       const refreshToken = jwt.sign({ id: result.id }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
       return res.status(200).json({
         status: 'true',
-        message: 'successfully logging',
+        message: 'login successful',
         access_token: token,
         refresh_token: refreshToken,
         role: result.role,
@@ -33,7 +33,7 @@ exports.login = (req, res) => {
     }
     return res.status(400).json({
       status: 'false',
-      message: 'Invalid email or password',
+      message: 'invalid email or password',
     });
   } catch (error) {
     console.error(error);
@@ -50,7 +50,7 @@ exports.refreshtoken = async (req, res) => {
     if (!refreshToken) {
       return res.status(400).json({
         status: false,
-        message: 'Refresh token is required',
+        message: 'refresh token is required',
       });
     }
     const decodedToken = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
@@ -58,7 +58,7 @@ exports.refreshtoken = async (req, res) => {
     if (!userId) {
       return res.status(400).json({
         status: false,
-        message: 'Invalid refresh token',
+        message: 'invalid refresh token',
       });
     }
     const newToken = jwt.sign({ id: userId }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
@@ -70,7 +70,7 @@ exports.refreshtoken = async (req, res) => {
     console.error(error);
     return res.status(400).json({
       status: false,
-      message: 'Error refreshing token',
+      message: 'error refreshing token',
     });
   }
 };
