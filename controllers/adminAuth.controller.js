@@ -124,3 +124,27 @@ exports.getuser = (req, res) => {
     });
   }
 };
+
+exports.getOne = (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const getOne = userData.find((data) => data.id === userId);
+    if (getOne) {
+      res.status(200).json({
+        status: true,
+        message: 'user retrieved successfully',
+        data: getOne,
+      });
+    } else {
+      res.status(404).json({
+        status: false,
+        message: 'user not found',
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: 'internal server error',
+    });
+  }
+};

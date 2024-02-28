@@ -64,7 +64,10 @@ exports.getone = (req, res) => {
         data: getOne,
       });
     } else {
-      res.status(400).send('user not found');
+      res.status(404).json({
+        status: false,
+        message: 'user not found',
+      });
     }
   } catch (error) {
     res.status(400).json({
