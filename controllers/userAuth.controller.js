@@ -201,7 +201,10 @@ exports.verifyotp = async (req, res) => {
     const userId = Number(req.params.id);
     const { otp } = req.body;
     if (otp !== newOtp) {
-      return res.status(400).send('Invalid OTP');
+      return res.status(400).json({
+        status: false,
+        message: 'invalid otp',
+      });
     }
     const result = userData.find((data) => data.id === userId);
     if (result) {
@@ -209,13 +212,13 @@ exports.verifyotp = async (req, res) => {
 
       return res.status(200).json({
         status: 'true',
-        message: 'Token verified',
+        message: 'otp verified',
         access_token: token,
         role: result.role,
       });
     }
     // Clear the OTP
-    return res.status(200).send('Token verified');
+    return res.status(200).send('otp verified');
   } catch (error) {
     console.error(error);
     return res.status(500).json({
