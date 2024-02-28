@@ -7,11 +7,27 @@
     "role": "admin"
   },
   {
-    "id": 1709093290824,
+    "id": 1709096261681,
     "firstName": "test",
     "lastName": "gg",
     "email": "vaisakhswg@techversantinfotech.com",
     "password": "password1231",
     "role": "qa"
+  },
+  {
+    "id": 1709096276270,
+    "firstName": "vaisakhg",
+    "lastName": "ggssg",
+    "email": "vaisakhg@techversantinfotech.com",
+    "password": "updated123",
+    "role": "agent"
+  },
+  {
+    "id": 1709096438943,
+    "firstName": "vaisakhg",
+    "lastName": "deGGmo",
+    "email": "vaisakhg1@techversantinfotech.com",
+    "password": "password123",
+    "role": "agent"
   }
 ]
