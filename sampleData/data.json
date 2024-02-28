@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "admin",
+    "email": "admin@gmail.com",
+    "password": "admin@12345",
+    "role": "admin"
+  },
+  {
+    "id": 1709093290824,
+    "firstName": "test",
+    "lastName": "gg",
+    "email": "vaisakhswg@techversantinfotech.com",
+    "password": "password1231",
+    "role": "qa"
+  }
+]
