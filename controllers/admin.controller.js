@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const Joi = require('@hapi/joi');
-const adminData = require('../sampleData/admin.json');
+const adminData = require('../sampleData/data.json');
 
 dotenv.config();
 

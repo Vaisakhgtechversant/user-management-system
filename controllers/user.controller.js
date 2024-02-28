@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const Joi = require('@hapi/joi');
-const userData = require('../sampleData/user.json');
+const userData = require('../sampleData/data.json');
 
 const authSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),

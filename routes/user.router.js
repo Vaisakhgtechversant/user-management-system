@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/login', userController.login);
 router.post('/add', userAuthController.addNewUser);
 router.get('/get/:id', verifyUserRole, verifyUser, userAuthController.getone);
-router.put('/update/:id', verifyUserRole, verifyUser, UploadPost.UploadImage, userAuthController.updateUser);
+router.put('/update-user/:id', verifyUserRole, verifyUser, UploadPost.UploadImage, userAuthController.updateUser);
 router.put('/update-password/:id', verifyUserRole, verifyUser, userAuthController.updatePassword);
 router.post('/forgetpassword/:id', userAuthController.sendOtp);
 router.post('/verifyotp/:id', userAuthController.verifyotp);

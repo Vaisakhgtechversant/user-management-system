@@ -1,4 +1,4 @@
-const userData = require('../sampleData/user.json');
+const userData = require('../sampleData/data.json');
 const writeUsers = require('../sampleData/write.user');
 const registrationSchema = require('../schemas/registration.schema');
 const updateSchema = require('../schemas/update.schema');

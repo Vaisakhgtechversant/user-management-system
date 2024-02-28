@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const admin = require('../sampleData/admin.json');
+const admin = require('../sampleData/data.json');
 
 dotenv.config();
 
