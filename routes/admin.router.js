@@ -1,5 +1,5 @@
 const express = require('express');
-const adminController = require('../controllers/admin.controller');
+const adminController = require('../controllers/login.controller');
 const adminCanController = require('../controllers/adminAuth.controller');
 const { verifyUserRole } = require('../middleware/authGuard.middleware');
 const { verifyAdmin } = require('../middleware/admin.middleware');
