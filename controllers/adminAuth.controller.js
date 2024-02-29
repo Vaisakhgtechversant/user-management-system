@@ -87,24 +87,32 @@ exports.updateUser = (req, res) => {
 exports.deleteUser = (req, res) => {
   try {
     const userId = Number(req.params.id);
-    const indexToRemove = userData.findIndex((user) => user.id === userId);
-    if (indexToRemove !== -1) {
-      userData.splice(indexToRemove, 1);
-      writeUsers(userData);
-      return res.status(200).json({
-        status: 'true',
-        message: 'user deleted successfully',
+    const userToDelete = userData.find((user) => user.id === userId);
+    if (!userToDelete) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
       });
     }
-    return res.status(404).json({
-      status: 'false',
-      message: 'user not found',
+    if (userToDelete.role === 'admin') {
+      return res.status(400).json({
+        status: false,
+        message: 'Cannot delete admin',
+      });
+    }
+    const indexToRemove = userData.indexOf(userToDelete);
+    userData.splice(indexToRemove, 1);
+    writeUsers(userData);
+
+    return res.status(200).json({
+      status: true,
+      message: 'User deleted successfully',
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      status: 'false',
-      message: 'internal server error',
+      status: false,
+      message: 'Internal server error',
     });
   }
 };

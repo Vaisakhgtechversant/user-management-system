@@ -9,7 +9,7 @@ module.exports = Joi.object({
     .required(),
   email: Joi.string().email().lowercase().required(),
   role: Joi.string()
-    .valid('admin', 'agent', 'supervisor', 'qc', 'qa')
+    .valid('agent', 'supervisor', 'qc', 'qa')
     .required(),
   password: Joi.string()
     .min(8)
