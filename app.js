@@ -20,5 +20,8 @@ server.use('/image', imgRouter);
 
 // set page not found
 server.use('*', (req, res) => {
-  res.send('page not found ');
+  res.status(404).json({
+    status: false,
+    message: 'page not found',
+  });
 });
