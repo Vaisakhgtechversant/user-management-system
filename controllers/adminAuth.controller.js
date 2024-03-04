@@ -176,3 +176,33 @@ exports.getOne = (req, res) => {
     });
   }
 };
+
+exports.search = (req, res) => {
+  try {
+    const { firstName } = req.query;
+    const { lastName } = req.query;
+
+    // Filter users based on provided first name and/or last name
+    const searchResults = userData.filter((user) => {
+      if (
+        (!firstName || user.firstName.toLowerCase().includes(firstName.toLowerCase()))
+        && (!lastName || user.lastName.toLowerCase().includes(lastName.toLowerCase()))
+      ) {
+        return true;
+      }
+      return false;
+    });
+
+    res.status(200).json({
+      status: true,
+      message: 'Search successful',
+      data: searchResults,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      message: 'Internal server error',
+    });
+  }
+};

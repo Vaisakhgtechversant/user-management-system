@@ -64,7 +64,7 @@ exports.refreshtoken = async (req, res) => {
     const newToken = jwt.sign({ id: userId }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
     return res.status(200).json({
       status: true,
-      refresh_token: newToken,
+      access_token: newToken,
     });
   } catch (error) {
     console.error(error);

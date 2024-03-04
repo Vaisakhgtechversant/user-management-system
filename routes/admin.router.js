@@ -12,6 +12,7 @@ router.get('/users', verifyUserRole, verifyAdmin, adminCanController.getuser);
 router.get('/user/:id', verifyUserRole, verifyAdmin, adminCanController.getOne);
 router.put('/update/:id', verifyUserRole, verifyAdmin, adminCanController.updateUser);
 router.delete('/delete/:id', verifyUserRole, verifyAdmin, adminCanController.deleteUser);
+router.get('/search', adminCanController.search);
 
 // Refresh Token
 router.post('/refresh-token', adminController.refreshtoken);

@@ -8,11 +8,12 @@
   },
   {
     "id": 1709531504747,
-    "firstName": "test",
-    "lastName": "gg",
+    "firstName": "vai",
+    "lastName": "sak",
     "email": "vaisakh1@techversantinfotech.com",
     "password": "passewewew",
-    "role": "agent"
+    "role": "agent",
+    "imageURL": "/images/Image-1709537707071.jpg"
   },
   {
     "id": 1709531509888,
