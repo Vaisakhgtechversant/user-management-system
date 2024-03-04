@@ -7,6 +7,13 @@
     "role": "admin"
   },
   {
+    "id": 2,
+    "name": "supervisor",
+    "email": "supervisor@gmail.com",
+    "password": "supervisor@12345",
+    "role": "supervisor"
+  },
+  {
     "id": 1709531504747,
     "firstName": "vai",
     "lastName": "sak",
@@ -173,6 +180,14 @@
     "lastName": "gg",
     "email": "vaisakh21@techversantinfotech.com",
     "password": "passewewew",
+    "role": "agent"
+  },
+  {
+    "id": 1709544399646,
+    "firstName": "vaisakhg",
+    "lastName": "deGGmo",
+    "email": "vaisakhg1@techversantinfotech.com",
+    "password": "password123",
     "role": "agent"
   }
 ]
