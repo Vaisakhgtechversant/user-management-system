@@ -19,7 +19,7 @@ exports.addUser = (req, res) => {
         message: 'unauthorized role',
       });
     }
-    const newUser = { id: new Date().getTime(), ...req.body };
+    const newUser = { id: new Date().getTime(), createdAT: new Date(), ...req.body };
     const emailExist = userData.find((value) => value.email === newUser.email);
     if (emailExist) {
       return res.status(409).json({
