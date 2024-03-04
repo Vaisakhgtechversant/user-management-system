@@ -124,7 +124,7 @@ exports.updatePassword = (req, res) => {
     }
     const userToUpdate = userData.find((user) => user.id === userId);
     if (!userToUpdate) {
-      return res.status(400).json({
+      return res.status(404).json({
         status: false,
         message: 'User Not Found',
       });

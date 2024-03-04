@@ -3,10 +3,17 @@ const fs = require('fs');
 
 exports.saveBlog = async (req, res) => {
   try {
-    res.status(200).send({ status: 'success', message: 'file uploaded successfully', filename: req.body.filename });
+    res.status(200).json({
+      status: true,
+      message: 'upload success',
+      filename: req.body.filename,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Internal server errorsss');
+    res.status(500).json({
+      status: false,
+      message: 'internal server error',
+    });
   }
 };
 
@@ -17,7 +24,10 @@ exports.getimage = ((req, res) => {
 
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
-      return res.status(404).send('File not found');
+      return res.status(404).json({
+        status: false,
+        message: 'file not found',
+      });
     }
     res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
     res.setHeader('Content-type', 'application/octet-stream');

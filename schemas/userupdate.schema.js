@@ -7,4 +7,5 @@ module.exports = Joi.object({
   lastName: Joi.string()
     .pattern(/^[a-zA-Z ]+$/).message('last name must contain only alphabetic characters')
     .required(),
+  filename: Joi.string().required(),
 });

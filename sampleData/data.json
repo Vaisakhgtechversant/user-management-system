@@ -5,5 +5,14 @@
     "email": "admin@gmail.com",
     "password": "admin@12345",
     "role": "admin"
+  },
+  {
+    "id": 1709524981338,
+    "firstName": "vai",
+    "lastName": "sak",
+    "email": "vaisakhg1e@techversantinfotech.com",
+    "password": "passewewew",
+    "role": "agent",
+    "filename": "Image-1709528353745.jpg"
   }
 ]
