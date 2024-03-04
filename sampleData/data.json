@@ -21,5 +21,24 @@
     "email": "vaisakhg@techversantinfotech.com",
     "password": "password@123",
     "role": "agent"
+  },
+  {
+    "id": 1709547663615,
+    "createdAT": "2024-03-04T10:21:03.615Z",
+    "firstName": "vaisakh",
+    "lastName": "gg",
+    "email": "vaisakhgg@techversantinfotech.com",
+    "password": "password@123",
+    "role": "agent"
+  },
+  {
+    "id": 1709547755234,
+    "createdAT": "2024-03-04T10:22:35.234Z",
+    "firstName": "vaisakh",
+    "lastName": "gg",
+    "email": "vaisakhg1g@techversantinfotech.com",
+    "password": "password@123",
+    "role": "qa",
+    "deletedAt": "2024-03-04T10:34:57.167Z"
   }
 ]

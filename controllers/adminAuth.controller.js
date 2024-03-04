@@ -100,13 +100,13 @@ exports.deleteUser = (req, res) => {
         message: 'Cannot delete admin',
       });
     }
-    const indexToRemove = userData.indexOf(userToDelete);
-    userData.splice(indexToRemove, 1);
+    userToDelete.deletedAt = new Date().toISOString();
+
     writeUsers(userData);
 
     return res.status(200).json({
       status: true,
-      message: 'User deleted successfully',
+      message: 'User soft-deleted successfully', // Updated response message
     });
   } catch (error) {
     console.error(error);
