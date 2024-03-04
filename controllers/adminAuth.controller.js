@@ -119,16 +119,36 @@ exports.deleteUser = (req, res) => {
 
 exports.getuser = (req, res) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = 10;
+    const totalUsers = userData.length;
+
+    const totalPages = Math.ceil(totalUsers / pageSize);
+
+    if (page < 1 || page > totalPages) {
+      res.status(404).json({
+        status: false,
+        message: 'Page not found',
+      });
+    }
+
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalUsers);
+
+    const paginatedData = userData.slice(startIndex, endIndex);
+
     res.status(200).json({
       status: true,
-      message: 'users data retrieved successfully',
-      data: userData,
+      message: 'Users data retrieved successfully',
+      currentPage: page,
+      totalPages,
+      data: paginatedData,
     });
   } catch (error) {
     console.error(error);
     res.status(400).json({
-      status: 'false',
-      message: 'token is missing',
+      status: false,
+      message: 'Token is missing',
     });
   }
 };
