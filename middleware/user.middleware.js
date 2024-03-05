@@ -15,6 +15,7 @@ exports.verifyUser = (req, res, next) => {
       console.log('Decoded Token:', decodedValue);
       try {
         const decodedId = jwt.verify(token, envtoken);
+        req.decodedId = decodedId.id;
         const userData = user.find((value) => value.id === decodedId.id);
         if (userData) {
           next();

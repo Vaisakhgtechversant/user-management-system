@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 const Joi = require('@hapi/joi');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
@@ -8,7 +8,7 @@ const registrationSchema = require('../schemas/registration.schema');
 const userUpdateSchema = require('../schemas/userupdate.schema');
 const updatePassword = require('../schemas/updatePassword.schema');
 
-const { envtoken } = process.env;
+// const { envtoken } = process.env;
 
 let newOtp = null;
 exports.addNewUser = (req, res) => {
@@ -30,7 +30,7 @@ exports.addNewUser = (req, res) => {
         message: 'only agent role is available',
       });
     }
-    const newUser = { id: new Date().getTime(), ...req.body };
+    const newUser = { id: new Date().getTime(), createdAT: new Date(), ...req.body };
     const emailExist = userData.find((value) => value.email === newUser.email);
     if (emailExist) {
       return res.status(409).json({
@@ -54,9 +54,9 @@ exports.addNewUser = (req, res) => {
 };
 exports.getone = (req, res) => {
   try {
-    const userId = Number(req.params.id);
-    const getOne = userData.find((data) => data.id === userId);
-    console.log(userData);
+    const id = req.decodedId;
+    const getOne = userData.find((data) => data.id === id);
+    console.log('getOne', getOne);
     if (getOne) {
       res.status(200).json({
         status: true,
@@ -79,7 +79,7 @@ exports.getone = (req, res) => {
 
 exports.updateUser = (req, res) => {
   try {
-    const userId = Number(req.params.id);
+    const id = req.decodedId;
     const updateUser = req.body;
     const { error } = userUpdateSchema.validate(updateUser);
     if (error) {
@@ -88,7 +88,7 @@ exports.updateUser = (req, res) => {
         message: error.details[0].message,
       });
     }
-    const index = userData.findIndex((data) => data.id === userId);
+    const index = userData.findIndex((data) => data.id === id);
     console.log(index);
     if (index !== -1) {
       userData[index] = { ...userData[index], ...updateUser };
@@ -113,7 +113,7 @@ exports.updateUser = (req, res) => {
 
 exports.updatePassword = (req, res) => {
   try {
-    const userId = Number(req.params.id);
+    const id = req.decodedId;
     const { password } = req.body;
     const { err } = updatePassword.validate(password);
     if (err) {
@@ -122,7 +122,7 @@ exports.updatePassword = (req, res) => {
         message: err.details[0].message,
       });
     }
-    const userToUpdate = userData.find((user) => user.id === userId);
+    const userToUpdate = userData.find((user) => user.id === id);
     if (!userToUpdate) {
       return res.status(404).json({
         status: false,
@@ -152,14 +152,20 @@ exports.updatePassword = (req, res) => {
 
 exports.sendOtp = async (req, res) => {
   try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        status: false,
+        message: 'Email is required',
+      });
+    }
     newOtp = await otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       specialChars: false,
       alphabets: false,
     });
-    const userId = Number(req.params.id);
-    const { email } = req.body;
-    const userToUpdate = userData.find((user) => user.id === userId);
+    const userToUpdate = userData.find((user) => user.email === email);
+    console.log(userToUpdate);
     if (!userToUpdate) {
       return res.status(400).json({
         status: false,
@@ -181,14 +187,21 @@ exports.sendOtp = async (req, res) => {
     };
     transporter.sendMail(mailOptions, (error) => {
       if (error) {
-        res.status(401).send(error);
+        res.status(500).json({
+          status: false,
+          message: 'Failed to send OTP',
+          error: error.message,
+        });
       } else {
-        res.send('otp  sended successfully');
+        res.status(200).json({
+          status: true,
+          message: 'OTP sent successfully',
+        });
       }
     });
     return res.status(200).json({
       status: true,
-      message: 'otp  sended successfully',
+      message: 'OTP sent successfully',
     });
   } catch (error) {
     return res.status(500).json({
@@ -201,27 +214,20 @@ exports.sendOtp = async (req, res) => {
 
 exports.verifyotp = async (req, res) => {
   try {
-    const userId = Number(req.params.id);
     const { otp } = req.body;
     if (otp !== newOtp) {
       return res.status(400).json({
         status: false,
-        message: 'invalid otp',
+        message: 'Invalid OTP',
       });
     }
-    const result = userData.find((data) => data.id === userId);
-    if (result) {
-      const token = jwt.sign({ id: result.id, name: result.name, role: result.role }, envtoken, { expiresIn: '15m' });
+    // Clear the OTP after successful verification
+    newOtp = null;
 
-      return res.status(200).json({
-        status: 'true',
-        message: 'otp verified',
-        access_token: token,
-        role: result.role,
-      });
-    }
-    // Clear the OTP
-    return res.status(200).send('otp verified');
+    return res.status(200).json({
+      status: true,
+      message: 'OTP verified',
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -234,7 +240,7 @@ exports.verifyotp = async (req, res) => {
 
 exports.changepassword = (req, res) => {
   try {
-    const userId = Number(req.params.id);
+    const id = req.decodedId;
     const { password, confirmPassword } = req.body;
     const { error } = Joi.object({
       password: Joi.string().min(8).required(),
@@ -250,7 +256,7 @@ exports.changepassword = (req, res) => {
         message: error.details[0].message,
       });
     }
-    const updatepassword = userData.find((data) => data.id === userId);
+    const updatepassword = userData.find((data) => data.id === id);
     if (!updatePassword) {
       return res.status(400).json({
         status: false,

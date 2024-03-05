@@ -177,32 +177,20 @@ exports.getOne = (req, res) => {
   }
 };
 
-exports.search = (req, res) => {
+exports.search = async (req, res) => {
   try {
-    const { firstName } = req.query;
-    const { lastName } = req.query;
-
-    // Filter users based on provided first name and/or last name
-    const searchResults = userData.filter((user) => {
-      if (
-        (!firstName || user.firstName.toLowerCase().includes(firstName.toLowerCase()))
-        && (!lastName || user.lastName.toLowerCase().includes(lastName.toLowerCase()))
-      ) {
-        return true;
-      }
-      return false;
+    const { key } = req.params;
+    const users = await userData.find({
+      $or: [
+        { firstName: { $regex: key, $options: 'i' } },
+        { lastName: { $regex: key, $options: 'i' } },
+        { email: { $regex: key, $options: 'i' } },
+      ],
     });
 
-    res.status(200).json({
-      status: true,
-      message: 'Search successful',
-      data: searchResults,
-    });
+    res.json(users);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: false,
-      message: 'Internal server error',
-    });
+    console.error('Error executing search query:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

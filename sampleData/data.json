@@ -16,11 +16,12 @@
   {
     "id": 1709547488305,
     "createdAT": "2024-03-04T10:18:08.305Z",
-    "firstName": "vaisakh",
-    "lastName": "g",
+    "firstName": "vaiakh",
+    "lastName": "updated",
     "email": "vaisakhg@techversantinfotech.com",
     "password": "password@123",
-    "role": "agent"
+    "role": "agent",
+    "imageURL": "/images/Image-1709554620888.jpg"
   },
   {
     "id": 1709547663615,
@@ -40,5 +41,32 @@
     "password": "password@123",
     "role": "qa",
     "deletedAt": "2024-03-04T10:34:57.167Z"
+  },
+  {
+    "id": 1709553644923,
+    "firstName": "vaisakhg",
+    "lastName": "deGGmo",
+    "email": "vaisakhg1@techversantinfotech.com",
+    "password": "password123",
+    "role": "agent"
+  },
+  {
+    "id": 1709620530142,
+    "createdAT": "2024-03-05T06:35:30.142Z",
+    "firstName": "vaisakh",
+    "lastName": "gg",
+    "email": "vaisakhg30@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qa"
+  },
+  {
+    "id": 1709622635066,
+    "createdAT": "2024-03-05T07:10:35.066Z",
+    "firstName": "vaiakh",
+    "lastName": "updated",
+    "email": "vaisakhg301@techversantinfotech.com",
+    "password": "updated123latest",
+    "role": "qc",
+    "imageURL": "/images/Image-1709623089148.jpg"
   }
 ]
