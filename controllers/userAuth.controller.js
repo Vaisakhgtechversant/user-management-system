@@ -114,12 +114,14 @@ exports.updateUser = (req, res) => {
 exports.updatePassword = (req, res) => {
   try {
     const id = req.decodedId;
+    const { currentPassword } = req.body;
     const { password } = req.body;
     const { err } = updatePassword.validate(password);
     if (err) {
-      res.status(400).json({
-        status: 'false',
-        message: err.details[0].message,
+      const errorMessage = err.details[0].message.replace(/['"]+/g, '');
+      return res.status(400).json({
+        status: false,
+        message: errorMessage,
       });
     }
     const userToUpdate = userData.find((user) => user.id === id);
@@ -131,9 +133,17 @@ exports.updatePassword = (req, res) => {
     }
     const { error } = Joi.string().min(8).validate(password);
     if (error) {
+      const errorMessage = err.details[0].message.replace(/['"]+/g, '');
       return res.status(400).json({
         status: false,
-        send: error.details[0].message,
+        message: errorMessage,
+      });
+    }
+    const currentpassword = userData.find((data) => data.password === currentPassword);
+    if (!currentpassword) {
+      res.status(400).json({
+        status: false,
+        message: 'current passowrd is wrong',
       });
     }
     userToUpdate.password = password;
@@ -145,7 +155,7 @@ exports.updatePassword = (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: false,
-      message: 'Internal server error',
+      message: 'password length minimum 8',
     });
   }
 };

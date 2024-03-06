@@ -19,7 +19,7 @@
     "firstName": "vaiakh",
     "lastName": "updated",
     "email": "vaisakhg00044@techversantinfotech.com",
-    "password": "password@1234",
+    "password": "12345677",
     "role": "qc",
     "imageURL": "/images/Image-1709699776603.jpg"
   },
@@ -47,6 +47,51 @@
     "firstName": "manumahadhevan",
     "lastName": "gg",
     "email": "manum@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc"
+  },
+  {
+    "id": 1709700007390,
+    "createdAT": "2024-03-06T04:40:07.390Z",
+    "firstName": "manumahadhevan",
+    "lastName": "gg",
+    "email": "manum1@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc"
+  },
+  {
+    "id": 1709700010150,
+    "createdAT": "2024-03-06T04:40:10.150Z",
+    "firstName": "manumahadhevan",
+    "lastName": "gg",
+    "email": "manum12@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc"
+  },
+  {
+    "id": 1709700012412,
+    "createdAT": "2024-03-06T04:40:12.412Z",
+    "firstName": "manumahadhevan",
+    "lastName": "gg",
+    "email": "manum122@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc"
+  },
+  {
+    "id": 1709700014582,
+    "createdAT": "2024-03-06T04:40:14.582Z",
+    "firstName": "manumahadhevan",
+    "lastName": "gg",
+    "email": "manum1223@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc"
+  },
+  {
+    "id": 1709700016945,
+    "createdAT": "2024-03-06T04:40:16.945Z",
+    "firstName": "manumahadhevan",
+    "lastName": "gg",
+    "email": "manum12243@techversantinfotech.com",
     "password": "password@1234",
     "role": "qc"
   }
