@@ -165,13 +165,22 @@ exports.getOne = (req, res) => {
 };
 exports.searchuser = (req, res) => {
   try {
-    const searchParam = req.params.search ? req.params.search.toLowerCase() : '';
-    const filteredUsers = userData
-      .filter((user) => (user.firstName
-        ? user.firstName.toLowerCase().includes(searchParam) : false)
-      || (user.lastName
-        ? user.lastName.toLowerCase().includes(searchParam) : false)
-      || (user.email ? user.email.toLowerCase().includes(searchParam) : false));
+    const searchParam = req.params.search.toLowerCase();
+    console.log('searchParam', searchParam);
+
+    let filteredUsers;
+    if (searchParam) {
+      console.log('inside');
+      filteredUsers = userData
+        .filter((user) => (user.firstName
+          ? user.firstName.toLowerCase().includes(searchParam) : false)
+        || (user.lastName
+          ? user.lastName.toLowerCase().includes(searchParam) : false)
+        || (user.email ? user.email.toLowerCase().includes(searchParam) : false));
+    } else {
+      console.log('userData', userData);
+      filteredUsers = userData;
+    }
 
     res.status(200).json({
       status: true,

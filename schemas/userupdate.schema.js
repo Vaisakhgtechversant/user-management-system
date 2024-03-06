@@ -3,11 +3,9 @@ const Joi = require('@hapi/joi');
 module.exports = Joi.object({
   firstName: Joi.string()
     .pattern(/^[a-zA-Z ]+$/).message('First name must contain only alphabetic characters')
-    .min(2)
-    .required(),
+    .min(2),
   lastName: Joi.string()
     .pattern(/^[a-zA-Z ]+$/).message('last name must contain only alphabetic characters')
-    .min(2)
-    .required(),
-  imageURL: Joi.string().required(),
+    .min(2),
+  imageURL: Joi.string(),
 });
