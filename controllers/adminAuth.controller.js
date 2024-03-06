@@ -169,8 +169,6 @@ exports.getOne = (req, res) => {
 exports.searchuser = (req, res) => {
   try {
     const searchParam = req.params.search.toLowerCase();
-
-    // Filter userDataList based on firstName, lastName, and email
     const filteredUsers = userData
       .filter((user) => (user.firstName
         ? user.firstName.toLowerCase().includes(searchParam) : false)

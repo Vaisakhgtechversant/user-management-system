@@ -104,7 +104,7 @@ exports.updateUser = (req, res) => {
       });
     }
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       status: 'false',
       message: 'Internal Server Error',
     });
