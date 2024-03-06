@@ -120,8 +120,7 @@ exports.getuser = (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limitNumber = parseInt(req.query.page, 10) || 10;
     const startIndex = (page - 1) * limitNumber;
-    const totalUsers = userData.length;
-    const totalPages = Math.ceil(totalUsers / limitNumber);
+    const totalCount = userData.length;
     const paginatedData = userData.slice(startIndex, startIndex + limitNumber);
 
     res.status(200).json({
@@ -129,7 +128,7 @@ exports.getuser = (req, res) => {
       message: 'Users data retrieved successfully',
       currentPage: page,
       limit: limitNumber,
-      totalPages,
+      totalCount,
       users: paginatedData,
     });
   } catch (error) {
@@ -166,7 +165,7 @@ exports.getOne = (req, res) => {
 };
 exports.searchuser = (req, res) => {
   try {
-    const searchParam = req.params.search.toLowerCase();
+    const searchParam = req.params.search ? req.params.search.toLowerCase() : '';
     const filteredUsers = userData
       .filter((user) => (user.firstName
         ? user.firstName.toLowerCase().includes(searchParam) : false)
