@@ -10,7 +10,7 @@ dotenv.config();
 const server = express();
 server.use(bodyParser.json());
 server.use(cors());
-
+server.use('/images', express.static('./images'));
 server.listen(8000, () => {
   console.log('server is running at port number 8000');
 });

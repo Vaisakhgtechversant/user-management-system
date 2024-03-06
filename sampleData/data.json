@@ -16,11 +16,12 @@
   {
     "id": 1709697689749,
     "createdAT": "2024-03-06T04:01:29.749Z",
-    "firstName": "vaisakh",
-    "lastName": "gg",
+    "firstName": "vaiakh",
+    "lastName": "updated",
     "email": "vaisakhg00044@techversantinfotech.com",
     "password": "password@1234",
-    "role": "qc"
+    "role": "qc",
+    "imageURL": "/images/Image-1709699776603.jpg"
   },
   {
     "id": 1709698936689,
