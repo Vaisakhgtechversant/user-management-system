@@ -14,59 +14,39 @@
     "role": "supervisor"
   },
   {
-    "id": 1709547488305,
-    "createdAT": "2024-03-04T10:18:08.305Z",
-    "firstName": "vaiakh",
-    "lastName": "updated",
-    "email": "vaisakhg@techversantinfotech.com",
-    "password": "password@123",
-    "role": "agent",
-    "imageURL": "/images/Image-1709554620888.jpg"
-  },
-  {
-    "id": 1709547663615,
-    "createdAT": "2024-03-04T10:21:03.615Z",
+    "id": 1709697689749,
+    "createdAT": "2024-03-06T04:01:29.749Z",
     "firstName": "vaisakh",
     "lastName": "gg",
-    "email": "vaisakhgg@techversantinfotech.com",
-    "password": "password@123",
-    "role": "agent"
-  },
-  {
-    "id": 1709547755234,
-    "createdAT": "2024-03-04T10:22:35.234Z",
-    "firstName": "vaisakh",
-    "lastName": "gg",
-    "email": "vaisakhg1g@techversantinfotech.com",
-    "password": "password@123",
-    "role": "qa",
-    "deletedAt": "2024-03-04T10:34:57.167Z"
-  },
-  {
-    "id": 1709553644923,
-    "firstName": "vaisakhg",
-    "lastName": "deGGmo",
-    "email": "vaisakhg1@techversantinfotech.com",
-    "password": "password123",
-    "role": "agent"
-  },
-  {
-    "id": 1709620530142,
-    "createdAT": "2024-03-05T06:35:30.142Z",
-    "firstName": "vaisakh",
-    "lastName": "gg",
-    "email": "vaisakhg30@techversantinfotech.com",
+    "email": "vaisakhg00044@techversantinfotech.com",
     "password": "password@1234",
-    "role": "qa"
+    "role": "qc"
   },
   {
-    "id": 1709622635066,
-    "createdAT": "2024-03-05T07:10:35.066Z",
-    "firstName": "vaiakh",
-    "lastName": "updated",
-    "email": "vaisakhg301@techversantinfotech.com",
-    "password": "updated123latest",
-    "role": "qc",
-    "imageURL": "/images/Image-1709623089148.jpg"
+    "id": 1709698936689,
+    "createdAT": "2024-03-06T04:22:16.689Z",
+    "firstName": "sam",
+    "lastName": "gg",
+    "email": "sam@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc"
+  },
+  {
+    "id": 1709698986936,
+    "createdAT": "2024-03-06T04:23:06.936Z",
+    "firstName": "manu",
+    "lastName": "gg",
+    "email": "manu@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc"
+  },
+  {
+    "id": 1709698999051,
+    "createdAT": "2024-03-06T04:23:19.051Z",
+    "firstName": "manumahadhevan",
+    "lastName": "gg",
+    "email": "manum@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc"
   }
 ]

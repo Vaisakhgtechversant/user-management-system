@@ -100,13 +100,13 @@ exports.deleteUser = (req, res) => {
         message: 'Cannot delete admin',
       });
     }
-    userToDelete.deletedAt = new Date().toISOString();
-
+    const indexToRemove = userData.indexOf(userToDelete);
+    userData.splice(indexToRemove, 1);
     writeUsers(userData);
 
     return res.status(200).json({
       status: true,
-      message: 'User soft-deleted successfully', // Updated response message
+      message: 'User deleted successfully',
     });
   } catch (error) {
     console.error(error);
@@ -120,29 +120,19 @@ exports.deleteUser = (req, res) => {
 exports.getuser = (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const pageSize = 10;
+    const limitNumber = parseInt(req.query.page, 10) || 10;
+    const startIndex = (page - 1) * limitNumber;
     const totalUsers = userData.length;
-
-    const totalPages = Math.ceil(totalUsers / pageSize);
-
-    if (page < 1 || page > totalPages) {
-      res.status(404).json({
-        status: false,
-        message: 'Page not found',
-      });
-    }
-
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = Math.min(startIndex + pageSize, totalUsers);
-
-    const paginatedData = userData.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(totalUsers / limitNumber);
+    const paginatedData = userData.slice(startIndex, startIndex + limitNumber);
 
     res.status(200).json({
       status: true,
       message: 'Users data retrieved successfully',
       currentPage: page,
+      limit: limitNumber,
       totalPages,
-      data: paginatedData,
+      users: paginatedData,
     });
   } catch (error) {
     console.error(error);
@@ -176,21 +166,28 @@ exports.getOne = (req, res) => {
     });
   }
 };
-
-exports.search = async (req, res) => {
+exports.searchuser = (req, res) => {
   try {
-    const { key } = req.params;
-    const users = await userData.find({
-      $or: [
-        { firstName: { $regex: key, $options: 'i' } },
-        { lastName: { $regex: key, $options: 'i' } },
-        { email: { $regex: key, $options: 'i' } },
-      ],
-    });
+    const searchParam = req.params.search.toLowerCase();
 
-    res.json(users);
+    // Filter userDataList based on firstName, lastName, and email
+    const filteredUsers = userData
+      .filter((user) => (user.firstName
+        ? user.firstName.toLowerCase().includes(searchParam) : false)
+      || (user.lastName
+        ? user.lastName.toLowerCase().includes(searchParam) : false)
+      || (user.email ? user.email.toLowerCase().includes(searchParam) : false));
+
+    res.status(200).json({
+      status: true,
+      message: 'Users data retrieved successfully',
+      data: filteredUsers,
+    });
   } catch (error) {
-    console.error('Error executing search query:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+    res.status(400).json({
+      status: false,
+      message: 'An error occurred while searching for users',
+    });
   }
 };
