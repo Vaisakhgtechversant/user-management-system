@@ -56,7 +56,6 @@ exports.getone = (req, res) => {
   try {
     const id = req.decodedId;
     const getOne = userData.find((data) => data.id === id);
-    console.log('getOne', getOne);
     if (getOne) {
       res.status(200).json({
         status: true,
@@ -83,28 +82,27 @@ exports.updateUser = (req, res) => {
     const updateUser = req.body;
     const { error } = userUpdateSchema.validate(updateUser);
     if (error) {
-      res.status(400).json({
-        status: 'false',
-        message: error.details[0].message,
+      const errorMessage = error.details[0].message.replace(/['"]+/g, '');
+      return res.status(400).json({
+        status: false,
+        message: errorMessage,
       });
     }
     const index = userData.findIndex((data) => data.id === id);
-    console.log(index);
     if (index !== -1) {
       userData[index] = { ...userData[index], ...updateUser };
       writeUsers(userData);
-      res.status(200).json({
+      return res.status(200).json({
         status: 'true',
         message: 'Updated',
       });
-    } else {
-      res.status(404).json({
-        status: 'false',
-        message: 'User Not Found',
-      });
     }
+    return res.status(404).json({
+      status: 'false',
+      message: 'User Not Found',
+    });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       status: 'false',
       message: 'Internal Server Error',
     });
@@ -175,7 +173,6 @@ exports.sendOtp = async (req, res) => {
       alphabets: false,
     });
     const userToUpdate = userData.find((user) => user.email === email);
-    console.log(userToUpdate);
     if (!userToUpdate) {
       return res.status(400).json({
         status: false,

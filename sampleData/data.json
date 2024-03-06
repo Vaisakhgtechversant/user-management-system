@@ -16,12 +16,12 @@
   {
     "id": 1709697689749,
     "createdAT": "2024-03-06T04:01:29.749Z",
-    "firstName": "vaiakh",
-    "lastName": "updated",
+    "firstName": "qq1",
+    "lastName": "qq",
     "email": "vaisakhg00044@techversantinfotech.com",
     "password": "12345677",
     "role": "qc",
-    "imageURL": "/images/Image-1709709163604.jpg"
+    "imageURL": "/images/Image-1709715933503.jpg"
   },
   {
     "id": 1709698936689,
@@ -89,10 +89,30 @@
   {
     "id": 1709700016945,
     "createdAT": "2024-03-06T04:40:16.945Z",
-    "firstName": "manumahadhevan",
-    "lastName": "gg",
+    "firstName": "qqq",
+    "lastName": "qq",
     "email": "manum12243@techversantinfotech.com",
     "password": "password@1234",
-    "role": "qc"
+    "role": "qc",
+    "imageURL": "/images/Image-1709717383399.jpg"
+  },
+  {
+    "id": 1709710540006,
+    "createdAT": "2024-03-06T07:35:40.006Z",
+    "firstName": "vaisakhg",
+    "lastName": "deGGmo",
+    "email": "vaisakhg1@techversantinfotech.com",
+    "password": "password123",
+    "role": "agent"
+  },
+  {
+    "id": 1709710558035,
+    "createdAT": "2024-03-06T07:35:58.035Z",
+    "firstName": "demoqqqop",
+    "lastName": "demol",
+    "email": "tested@gmail.com",
+    "password": "testedwwwwww@344",
+    "role": "supervisor",
+    "imageURL": "/images/Image-1709716134939.jpg"
   }
 ]

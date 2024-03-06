@@ -19,7 +19,6 @@ exports.saveBlog = async (req, res) => {
 
 exports.getimage = ((req, res) => {
   const fileName = req.params.filename;
-  console.log(fileName);
   const filePath = path.join('images/', fileName);
 
   fs.access(filePath, fs.constants.F_OK, (err) => {

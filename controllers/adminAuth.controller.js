@@ -56,28 +56,26 @@ exports.updateUser = (req, res) => {
     const { error } = updateSchema.validate(updateUser);
     if (error) {
       const errorMessage = error.details[0].message.replace(/['"]+/g, '');
-      res.status(400).json({
+      return res.status(400).json({
         status: false,
         message: errorMessage,
       });
     }
     const index = userData.findIndex((data) => data.id === userId);
-    console.log(index);
     if (index !== -1) {
       userData[index] = { ...userData[index], ...updateUser };
       writeUsers(userData);
-      res.status(200).json({
+      return res.status(200).json({
         status: 'true',
         message: 'user update successfully',
       });
-    } else {
-      res.status(404).json({
-        status: 'false',
-        message: 'user not found',
-      });
     }
+    return res.status(404).json({
+      status: 'false',
+      message: 'user not found',
+    });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       status: 'false',
       message: 'internal server error',
     });
