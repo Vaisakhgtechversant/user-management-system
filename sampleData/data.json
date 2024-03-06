@@ -12,5 +12,15 @@
     "email": "supervisor@gmail.com",
     "password": "supervisor@123456",
     "role": "supervisor"
+  },
+  {
+    "id": 1709728115189,
+    "createdAT": "2024-03-06T12:28:35.189Z",
+    "firstName": "hai",
+    "lastName": "gg",
+    "email": "manu@techversantinfotech.com",
+    "password": "password@1234",
+    "role": "qc",
+    "imageURL": "/images/Image-1709728588010.jpg"
   }
 ]
