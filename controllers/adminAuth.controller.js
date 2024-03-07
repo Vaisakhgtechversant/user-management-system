@@ -166,7 +166,7 @@ exports.getOne = (req, res) => {
 exports.searchuser = (req, res) => {
   try {
     const searchParam = req.params.search.toLowerCase();
-    console.log('searchParam', searchParam);
+    console.log('searchParam');
 
     let filteredUsers;
     if (searchParam) {
