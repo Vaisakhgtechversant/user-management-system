@@ -1,9 +1,8 @@
-const userData = require('../sampleData/data.json');
-const writeUsers = require('../sampleData/write.user');
 const registrationSchema = require('../schemas/registration.schema');
 const updateSchema = require('../schemas/update.schema');
+const userModel = require('../model/user.model');
 
-exports.addUser = (req, res) => {
+exports.addUser = async (req, res) => {
   try {
     const { error } = registrationSchema.validate(req.body);
     if (error) {
@@ -13,29 +12,25 @@ exports.addUser = (req, res) => {
         message: errorMessage,
       });
     }
+    const existingUser = await userModel.findOne({ email: req.body.email });
+    if (existingUser) {
+      return res.status(409).json({
+        status: false,
+        message: 'Email already exists',
+      });
+    }
     if (req.body.role !== 'agent' && req.body.role !== 'supervisor' && req.body.role !== 'qa' && req.body.role !== 'qc') {
       return res.status(403).json({
         status: 'false',
         message: 'unauthorized role',
       });
     }
-    const newUser = { id: new Date().getTime(), createdAT: new Date(), ...req.body };
-    const emailExist = userData.find((value) => value.email === newUser.email);
-    if (emailExist) {
-      return res.status(409).json({
-        status: 'false',
-        message: 'email is already exist',
-      });
-    }
-    const idExist = userData.find((value) => value.id === newUser.id);
-    if (idExist) {
-      return res.status(409).json({
-        status: 'false',
-        message: 'id is already exist',
-      });
-    }
-    userData.push(newUser);
-    writeUsers(userData);
+    const {
+      firstName, lastName, email, password, role,
+    } = req.body;
+    await userModel.create({
+      firstName, lastName, email, password, role,
+    });
     return res.status(201).json({
       status: 'true',
       message: 'registration successful',
@@ -51,8 +46,10 @@ exports.addUser = (req, res) => {
 
 exports.updateUser = (req, res) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
+
     const updateUser = req.body;
+
     const { error } = updateSchema.validate(updateUser);
     if (error) {
       const errorMessage = error.details[0].message.replace(/['"]+/g, '');
@@ -61,10 +58,12 @@ exports.updateUser = (req, res) => {
         message: errorMessage,
       });
     }
-    const index = userData.findIndex((data) => data.id === userId);
+
+    const index = userModel.updateOne({ id: userId });
+    console.log('index', index);
+
     if (index !== -1) {
-      userData[index] = { ...userData[index], ...updateUser };
-      writeUsers(userData);
+      userModel[index] = { ...userModel[index], ...updateUser };
       return res.status(200).json({
         status: 'true',
         message: 'user update successfully',
@@ -115,13 +114,13 @@ exports.deleteUser = (req, res) => {
   }
 };
 
-exports.getuser = (req, res) => {
+exports.getuser = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limitNumber = parseInt(req.query.page, 10) || 10;
     const startIndex = (page - 1) * limitNumber;
-    const totalCount = userData.length;
-    const paginatedData = userData.slice(startIndex, startIndex + limitNumber);
+    const totalCount = await userModel.countDocuments();
+    const paginatedData = await userModel.find().skip(startIndex).limit(limitNumber);
 
     res.status(200).json({
       status: true,
@@ -141,28 +140,31 @@ exports.getuser = (req, res) => {
 };
 
 exports.getOne = (req, res) => {
-  try {
-    const userId = Number(req.params.id);
-    const getOne = userData.find((data) => data.id === userId);
-    if (getOne) {
-      res.status(200).json({
-        status: true,
-        message: 'user retrieved successfully',
-        data: getOne,
-      });
-    } else {
-      res.status(404).json({
+  const userId = req.params.id;
+  userModel.findOne({ _id: userId })
+    .then((data) => {
+      if (data) {
+        res.status(200).json({
+          status: true,
+          message: 'User retrieved successfully',
+          result: data,
+        });
+      } else {
+        res.status(404).json({
+          status: false,
+          message: 'User not found',
+        });
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({
         status: false,
-        message: 'user not found',
+        message: 'Internal server error',
       });
-    }
-  } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: 'internal server error',
     });
-  }
 };
+
 exports.searchuser = (req, res) => {
   try {
     const searchParam = req.params.search.toLowerCase();

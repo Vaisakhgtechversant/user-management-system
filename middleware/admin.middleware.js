@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const admin = require('../sampleData/data.json');
+const userModel = require('../model/user.model');
 
 dotenv.config();
 
@@ -12,7 +12,8 @@ exports.verifyAdmin = (req, res, next) => {
     if (token) {
       try {
         const decodedId = jwt.verify(token, envtoken);
-        const adminData = admin.find((value) => value.id === decodedId.id);
+        const adminData = userModel.findOne({ id: decodedId.id });
+
         if (adminData) {
           next();
         } else {
