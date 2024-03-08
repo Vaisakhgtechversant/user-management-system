@@ -117,18 +117,30 @@ exports.deleteUser = (req, res) => {
 
 exports.getuser = (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limitNumber = parseInt(req.query.page, 10) || 10;
-    const startIndex = (page - 1) * limitNumber;
-    const totalCount = userData.length;
-    const paginatedData = userData.slice(startIndex, startIndex + limitNumber);
-
+    const { page, limit, search } = req.query;
+    let filteredData = userData;
+    if (search) {
+      console.log('inside');
+      filteredData = userData
+        .filter((user) => (user.firstName
+          ? user.firstName.toLowerCase().includes(search) : false)
+        || (user.lastName
+          ? user.lastName.toLowerCase().includes(search) : false)
+        || (user.email ? user.email.toLowerCase().includes(search) : false));
+    } else {
+      console.log('userData', userData);
+      filteredData = userData;
+    }
+    const currentPage = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    const startIndex = (currentPage - 1) * limitNumber;
+    const paginatedData = filteredData.slice(startIndex, startIndex + limitNumber);
     res.status(200).json({
       status: true,
       message: 'Users data retrieved successfully',
-      currentPage: page,
+      currentPage,
       limit: limitNumber,
-      totalCount,
+      totalCount: filteredData.length,
       users: paginatedData,
     });
   } catch (error) {
@@ -160,38 +172,6 @@ exports.getOne = (req, res) => {
     res.status(500).json({
       status: false,
       message: 'internal server error',
-    });
-  }
-};
-exports.searchuser = (req, res) => {
-  try {
-    const searchParam = req.params.search.toLowerCase();
-    console.log('searchParam', searchParam);
-
-    let filteredUsers;
-    if (searchParam) {
-      console.log('inside');
-      filteredUsers = userData
-        .filter((user) => (user.firstName
-          ? user.firstName.toLowerCase().includes(searchParam) : false)
-        || (user.lastName
-          ? user.lastName.toLowerCase().includes(searchParam) : false)
-        || (user.email ? user.email.toLowerCase().includes(searchParam) : false));
-    } else {
-      console.log('userData', userData);
-      filteredUsers = userData;
-    }
-
-    res.status(200).json({
-      status: true,
-      message: 'Users data retrieved successfully',
-      data: filteredUsers,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({
-      status: false,
-      message: 'An error occurred while searching for users',
     });
   }
 };
