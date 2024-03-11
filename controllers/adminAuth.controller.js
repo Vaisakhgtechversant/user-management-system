@@ -1,6 +1,7 @@
 const registrationSchema = require('../schemas/registration.schema');
 const updateSchema = require('../schemas/update.schema');
 const userModel = require('../model/user.model');
+const { handleError } = require('../utils/serverError');
 
 exports.addUser = async (req, res) => {
   try {
@@ -39,12 +40,12 @@ exports.addUser = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 'false',
-      message: 'token missing or invalid',
+      message: 'internal server error',
     });
   }
 };
 
-exports.updateUser = (req, res) => {
+exports.updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
 
@@ -58,58 +59,42 @@ exports.updateUser = (req, res) => {
         message: errorMessage,
       });
     }
-
-    const index = userModel.updateOne({ id: userId });
-    console.log('index', index);
-
-    if (index !== -1) {
-      userModel[index] = { ...userModel[index], ...updateUser };
+    await userModel.updateOne({ _id: userId }, { $set: req.body }).then((data) => {
+      if (!data) {
+        return res.status(404).json({
+          status: 'false',
+          message: 'user not found',
+        });
+      }
       return res.status(200).json({
         status: 'true',
-        message: 'user update successfully',
+        message: 'updated',
       });
-    }
-    return res.status(404).json({
-      status: 'false',
-      message: 'user not found',
     });
   } catch (error) {
-    return res.status(400).json({
-      status: 'false',
-      message: 'internal server error',
-    });
+    return handleError(res);
   }
 };
 
-exports.deleteUser = (req, res) => {
+exports.deleteUser = async (req, res) => {
   try {
-    const userId = Number(req.params.id);
-    const userToDelete = userData.find((user) => user.id === userId);
-    if (!userToDelete) {
-      return res.status(404).json({
-        status: false,
-        message: 'User not found',
+    const userId = req.params.id;
+    await userModel.deleteOne({ _id: userId }).then((data) => {
+      if (!data) {
+        return res.status(404).json({
+          status: 'false',
+          message: 'user not found',
+        });
+      }
+      return res.status(200).json({
+        status: 'true',
+        message: 'deleted',
       });
-    }
-    if (userToDelete.role === 'admin') {
-      return res.status(400).json({
-        status: false,
-        message: 'Cannot delete admin',
-      });
-    }
-    const indexToRemove = userData.indexOf(userToDelete);
-    userData.splice(indexToRemove, 1);
-    writeUsers(userData);
-
-    return res.status(200).json({
-      status: true,
-      message: 'User deleted successfully',
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
-      status: false,
-      message: 'Internal server error',
+      status: 'false',
+      message: 'internal server error',
     });
   }
 };
@@ -163,37 +148,4 @@ exports.getOne = (req, res) => {
         message: 'Internal server error',
       });
     });
-};
-
-exports.searchuser = (req, res) => {
-  try {
-    const searchParam = req.params.search.toLowerCase();
-    console.log('searchParam');
-
-    let filteredUsers;
-    if (searchParam) {
-      console.log('inside');
-      filteredUsers = userData
-        .filter((user) => (user.firstName
-          ? user.firstName.toLowerCase().includes(searchParam) : false)
-        || (user.lastName
-          ? user.lastName.toLowerCase().includes(searchParam) : false)
-        || (user.email ? user.email.toLowerCase().includes(searchParam) : false));
-    } else {
-      console.log('userData', userData);
-      filteredUsers = userData;
-    }
-
-    res.status(200).json({
-      status: true,
-      message: 'Users data retrieved successfully',
-      data: filteredUsers,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({
-      status: false,
-      message: 'An error occurred while searching for users',
-    });
-  }
 };

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const user = require('../sampleData/data.json');
+const userModel = require('../model/user.model');
 
 dotenv.config();
 exports.verifyUser = (req, res, next) => {
@@ -10,8 +10,9 @@ exports.verifyUser = (req, res, next) => {
     if (token) {
       try {
         const decodedId = jwt.verify(token, envtoken);
+        req.userPass = decodedId.password;
         req.decodedId = decodedId.id;
-        const userData = user.find((value) => value.id === decodedId.id);
+        const userData = userModel.findOne({ id: req.decodedId });
         if (userData) {
           next();
         } else {

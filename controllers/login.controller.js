@@ -15,7 +15,9 @@ exports.login = async (req, res) => {
     const result = await userModel.findOne({ email });
     if (result && result.password === password) {
       const { _id, name, role } = result;
-      const token = jwt.sign({ id: _id, name, role }, envtoken, { expiresIn: '1hr' });
+      const token = jwt.sign({
+        id: _id, name, role, password,
+      }, envtoken, { expiresIn: '1hr' });
       const refreshToken = jwt.sign({ id: _id }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
       return res.status(200).json({
         status: 'true',

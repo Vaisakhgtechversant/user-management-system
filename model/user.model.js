@@ -20,6 +20,13 @@ const userModel = mongoose.Schema({
     require: true,
     type: String,
   },
+  image: {
+    type: Buffer,
+  },
+  otp: {
+    require: false,
+    type: String,
+  },
   password: {
     require: true,
     type: String,

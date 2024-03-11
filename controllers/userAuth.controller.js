@@ -1,84 +1,77 @@
-// const jwt = require('jsonwebtoken');
 const Joi = require('@hapi/joi');
+const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
-const userData = require('../sampleData/data.json');
-const writeUsers = require('../sampleData/write.user');
-const registrationSchema = require('../schemas/registration.schema');
+const dotenv = require('dotenv');
+const userModel = require('../model/user.model');
+// const registrationSchema = require('../schemas/registration.schema');
+const userRegistrationSchema = require('../schemas/userRegistration.schema');
 const userUpdateSchema = require('../schemas/userupdate.schema');
 const updatePassword = require('../schemas/updatePassword.schema');
+const { handleError } = require('../utils/serverError');
 
-// const { envtoken } = process.env;
-
+dotenv.config();
+const { envtoken } = process.env;
 let newOtp = null;
-exports.addNewUser = (req, res) => {
+exports.addNewUser = async (req, res) => {
   try {
-    const { error } = registrationSchema.validate(req.body);
+    const { error } = userRegistrationSchema.validate(req.body);
     if (error) {
       return res.status(400).send(error.details[0].message);
     }
-    const { email, password, role } = req.body;
-    if (!email || !password || !role) {
-      return res.status(400).json({
-        status: 'false',
-        message: 'email, password, and role are required',
-      });
-    }
-    if (req.body.role !== 'agent') {
-      return res.status(403).json({
-        status: 'false',
-        message: 'only agent role is available',
-      });
-    }
-    const newUser = { id: new Date().getTime(), createdAT: new Date(), ...req.body };
-    const emailExist = userData.find((value) => value.email === newUser.email);
-    if (emailExist) {
+    const existingUser = await userModel.findOne({ email: req.body.email });
+    if (existingUser) {
       return res.status(409).json({
-        status: 'false',
-        message: 'email is already exist',
+        status: false,
+        message: 'Email already exists',
       });
     }
-    userData.push(newUser);
-    writeUsers(userData);
+    const {
+      firstName, lastName, email, password, role,
+    } = req.body;
+    await userModel.create({
+      firstName, lastName, email, password, role,
+    });
     return res.status(201).json({
       status: 'true',
       message: 'registration successful',
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: 'false',
-      message: 'token missing or invalid',
-    });
+    return handleError(res);
   }
 };
-exports.getone = (req, res) => {
+
+exports.getone = async (req, res) => {
   try {
-    const id = req.decodedId;
-    const getOne = userData.find((data) => data.id === id);
-    if (getOne) {
-      res.status(200).json({
-        status: true,
-        message: 'user retrieved successfully',
-        data: getOne,
-      });
-    } else {
-      res.status(404).json({
-        status: false,
-        message: 'user not found',
-      });
-    }
+    console.log('hi');
+    const userId = req.decodedId;
+    console.log('userId', userId);
+    await userModel.findOne({ _id: userId }).then((data) => {
+      if (data) {
+        res.status(200).json({
+          status: true,
+          message: 'user retrieved successfully',
+          result: data,
+        });
+      } else {
+        res.status(404).json({
+          status: false,
+          message: 'user not found',
+        });
+      }
+    });
   } catch (error) {
+    console.log('hi');
     res.status(400).json({
       status: 'false',
       message: 'internal server error',
     });
   }
 };
-
-exports.updateUser = (req, res) => {
+exports.updateUser = async (req, res) => {
   try {
     const id = req.decodedId;
+    console.log('id', id);
     const updateUser = req.body;
     const { error } = userUpdateSchema.validate(updateUser);
     if (error) {
@@ -88,32 +81,25 @@ exports.updateUser = (req, res) => {
         message: errorMessage,
       });
     }
-    const index = userData.findIndex((data) => data.id === id);
-    if (index !== -1) {
-      userData[index] = { ...userData[index], ...updateUser };
-      writeUsers(userData);
-      return res.status(200).json({
-        status: 'true',
-        message: 'Updated',
-      });
+    if (req.file) {
+      const imageBuffer = req.file.buffer;
+      await userModel.updateOne({ _id: id }, { $set: { image: imageBuffer, ...updateUser } });
+    } else {
+      await userModel.updateOne({ _id: id }, { $set: updateUser });
     }
-    return res.status(404).json({
-      status: 'false',
-      message: 'User Not Found',
+    return res.status(200).json({
+      status: 'true',
+      message: 'updated',
     });
   } catch (error) {
-    return res.status(500).json({
-      status: 'false',
-      message: 'Internal Server Error',
-    });
+    return handleError(res);
   }
 };
 
-exports.updatePassword = (req, res) => {
+exports.updatePassword = async (req, res) => {
   try {
-    const id = req.decodedId;
-    const { currentPassword } = req.body;
-    const { password } = req.body;
+    const userId = req.decodedId;
+    const { currentPassword, password } = req.body;
     const { err } = updatePassword.validate(password);
     if (err) {
       const errorMessage = err.details[0].message.replace(/['"]+/g, '');
@@ -122,30 +108,21 @@ exports.updatePassword = (req, res) => {
         message: errorMessage,
       });
     }
-    const userToUpdate = userData.find((user) => user.id === id);
+    const userToUpdate = await userModel.findById(userId);
     if (!userToUpdate) {
       return res.status(404).json({
         status: false,
         message: 'User Not Found',
       });
     }
-    const { error } = Joi.string().min(8).validate(password);
-    if (error) {
-      const errorMessage = err.details[0].message.replace(/['"]+/g, '');
+    if (currentPassword !== userToUpdate.password) {
       return res.status(400).json({
         status: false,
-        message: errorMessage,
-      });
-    }
-    const currentpassword = userData.find((data) => data.password === currentPassword);
-    if (!currentpassword) {
-      res.status(400).json({
-        status: false,
-        message: 'current passowrd is wrong',
+        message: 'Current password is wrong',
       });
     }
     userToUpdate.password = password;
-    writeUsers(userData);
+    await userToUpdate.save();
     return res.status(200).json({
       status: true,
       message: 'Password updated',
@@ -153,7 +130,7 @@ exports.updatePassword = (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: false,
-      message: 'password length minimum 8',
+      message: 'Internal Server Error',
     });
   }
 };
@@ -167,62 +144,70 @@ exports.sendOtp = async (req, res) => {
         message: 'Email is required',
       });
     }
-    newOtp = await otpGenerator.generate(6, {
+
+    // Check if the user exists in the database
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+
+    // Generate OTP
+    newOtp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       specialChars: false,
       alphabets: false,
     });
-    const userToUpdate = userData.find((user) => user.email === email);
-    if (!userToUpdate) {
-      return res.status(400).json({
-        status: false,
-        message: 'User Not Found',
-      });
-    }
-    const transporter = await nodemailer.createTransport({
+
+    // Update user document with the new OTP
+    user.otp = newOtp;
+    await user.save();
+
+    // Send OTP via email
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: 'vaisakhg30@gmail.com',
         pass: 'oiadmibebbronett',
       },
     });
+
     const mailOptions = {
       from: 'ums@gmail.com',
       to: email,
       subject: 'OTP to reset password',
       text: newOtp,
     };
+
     transporter.sendMail(mailOptions, (error) => {
       if (error) {
-        res.status(500).json({
+        return res.status(500).json({
           status: false,
           message: 'Failed to send OTP',
           error: error.message,
         });
-      } else {
-        res.status(200).json({
-          status: true,
-          message: 'OTP sent successfully',
-        });
       }
-    });
-    return res.status(200).json({
-      status: true,
-      message: 'OTP sent successfully',
+      return res.status(200).json({
+        status: true,
+        message: 'OTP sent successfully',
+      });
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal server error',
-      error,
-    });
+    return handleError(res, error);
   }
 };
 
 exports.verifyotp = async (req, res) => {
   try {
+    
+    await userModel.findOne({  })
+    console.log('newOtp', newOtp);
     const { otp } = req.body;
+    console.log('otp', otp);
     if (otp !== newOtp) {
+      console.log('newotp:', newOtp);
       return res.status(400).json({
         status: false,
         message: 'Invalid OTP',
@@ -230,28 +215,37 @@ exports.verifyotp = async (req, res) => {
     }
     // Clear the OTP after successful verification
     newOtp = null;
+    // Generate an access token
+    const userId = req.decodedId;
+    console.log('userId', userId);
+    const accessToken = jwt.sign({ userId }, envtoken, { expiresIn: '1h' });
 
     return res.status(200).json({
       status: true,
       message: 'OTP verified',
+      accessToken,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: false,
-      message: 'Internal server error',
-      error: error.message,
-    });
+    return handleError(res, error);
   }
 };
 
-exports.changepassword = (req, res) => {
+exports.changepassword = async (req, res) => {
   try {
-    const id = req.decodedId;
+    const accessToken = req.headers.authorization;
+    const decodedToken = jwt.verify(accessToken, envtoken);
+    console.log('decodedToken', decodedToken);
+
+    const userId = decodedToken.id;
+
     const { password, confirmPassword } = req.body;
+
     const { error } = Joi.object({
       password: Joi.string().min(8).required(),
-      confirmPassword: Joi.string().valid(Joi.ref('password')).required().strict()
+      confirmPassword: Joi.string()
+        .valid(Joi.ref('password'))
+        .required()
+        .strict()
         .messages({
           'any.only': 'Passwords do not match',
         }),
@@ -263,24 +257,26 @@ exports.changepassword = (req, res) => {
         message: error.details[0].message,
       });
     }
-    const updatepassword = userData.find((data) => data.id === id);
-    if (!updatePassword) {
-      return res.status(400).json({
+
+    // Find the user by ID in the database
+    const userToUpdate = await userModel.findById(userId);
+
+    if (!userToUpdate) {
+      return res.status(404).json({
         status: false,
         message: 'User Not Found',
       });
     }
-    updatepassword.password = password;
-    writeUsers(userData);
+
+    // Update the user's password
+    userToUpdate.password = password;
+    await userToUpdate.save();
+
     return res.status(200).json({
       status: true,
       message: 'Password Changed',
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
+    return handleError(res, error);
   }
 };
