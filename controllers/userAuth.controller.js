@@ -201,8 +201,7 @@ exports.sendOtp = async (req, res) => {
 
 exports.verifyotp = async (req, res) => {
   try {
-    
-    await userModel.findOne({  })
+    await userModel.findById(userId);
     console.log('newOtp', newOtp);
     const { otp } = req.body;
     console.log('otp', otp);
