@@ -244,6 +244,11 @@ exports.verifyOtp = async (req, res) => {
         accessToken,
       });
     }
+    return res.status(404).json({
+      status: false,
+      message: 'User not found',
+    });
+
     // Generate an access token
   } catch (error) {
     console.error(error);

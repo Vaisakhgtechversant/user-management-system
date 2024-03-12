@@ -12,24 +12,5 @@
     "email": "supervisor@gmail.com",
     "password": "supervisor@123456",
     "role": "supervisor"
-  },
-  {
-    "id": 1709728115189,
-    "createdAT": "2024-03-06T12:28:35.189Z",
-    "firstName": "hai",
-    "lastName": "gg",
-    "email": "manu@techversantinfotech.com",
-    "password": "password@1234",
-    "role": "qc",
-    "imageURL": "/images/Image-1709728588010.jpg"
-  },
-  {
-    "id": 1710160164566,
-    "createdAT": "2024-03-11T12:29:24.566Z",
-    "firstName": "VAISAKH",
-    "lastName": "Pp",
-    "email": "vaisakhg@techversantinfotech.com",
-    "password": "changed12345670011",
-    "role": "qc"
   }
 ]
