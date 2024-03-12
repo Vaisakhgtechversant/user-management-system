@@ -71,6 +71,10 @@ exports.updateUser = async (req, res) => {
         message: 'updated',
       });
     });
+    return res.status(200).json({
+      status: 'true',
+      message: 'updated',
+    });
   } catch (error) {
     return handleError(res);
   }
@@ -90,6 +94,10 @@ exports.deleteUser = async (req, res) => {
         status: 'true',
         message: 'deleted',
       });
+    });
+    return res.status(200).json({
+      status: 'true',
+      message: 'deleted',
     });
   } catch (error) {
     return res.status(500).json({

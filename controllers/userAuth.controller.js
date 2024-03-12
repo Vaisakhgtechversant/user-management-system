@@ -1,10 +1,8 @@
-const Joi = require('@hapi/joi');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
 const dotenv = require('dotenv');
 const userModel = require('../model/user.model');
-// const registrationSchema = require('../schemas/registration.schema');
 const userRegistrationSchema = require('../schemas/userRegistration.schema');
 const userUpdateSchema = require('../schemas/userupdate.schema');
 const updatePassword = require('../schemas/updatePassword.schema');
@@ -144,8 +142,11 @@ exports.sendOtp = async (req, res) => {
         message: 'Email is required',
       });
     }
-
-    // Check if the user exists in the database
+    newOtp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+      alphabets: false,
+    });
     const user = await userModel.findOne({ email });
     if (!user) {
       return res.status(404).json({
@@ -153,15 +154,6 @@ exports.sendOtp = async (req, res) => {
         message: 'User not found',
       });
     }
-
-    // Generate OTP
-    newOtp = otpGenerator.generate(6, {
-      upperCaseAlphabets: false,
-      specialChars: false,
-      alphabets: false,
-    });
-
-    // Update user document with the new OTP
     user.otp = newOtp;
     await user.save();
 
@@ -194,6 +186,10 @@ exports.sendOtp = async (req, res) => {
         message: 'OTP sent successfully',
       });
     });
+    return res.status(200).json({
+      status: true,
+      message: 'OTP sent successfully',
+    });
   } catch (error) {
     return handleError(res, error);
   }
@@ -201,28 +197,25 @@ exports.sendOtp = async (req, res) => {
 
 exports.verifyotp = async (req, res) => {
   try {
-    await userModel.findById(userId);
-    console.log('newOtp', newOtp);
-    const { otp } = req.body;
-    console.log('otp', otp);
-    if (otp !== newOtp) {
-      console.log('newotp:', newOtp);
-      return res.status(400).json({
-        status: false,
-        message: 'Invalid OTP',
+    const { Otp, useremail } = req.body;
+    console.log('Otp', Otp);
+    console.log('useremail', useremail);
+    const user = await userModel.findOne({ email: useremail, otp: Otp });
+    if (user) {
+      const accessToken = jwt.sign({ useremail, Otp }, envtoken, { expiresIn: '1h' });
+      await userModel.findOneAndUpdate(
+        { email: useremail },
+        { $unset: { otp: '' } },
+      );
+      return res.status(200).json({
+        status: true,
+        message: 'OTP verified',
+        accessToken,
       });
     }
-    // Clear the OTP after successful verification
-    newOtp = null;
-    // Generate an access token
-    const userId = req.decodedId;
-    console.log('userId', userId);
-    const accessToken = jwt.sign({ userId }, envtoken, { expiresIn: '1h' });
-
-    return res.status(200).json({
-      status: true,
-      message: 'OTP verified',
-      accessToken,
+    return res.status(400).json({
+      status: false,
+      message: 'Invalid OTP',
     });
   } catch (error) {
     return handleError(res, error);
@@ -233,47 +226,35 @@ exports.changepassword = async (req, res) => {
   try {
     const accessToken = req.headers.authorization;
     const decodedToken = jwt.verify(accessToken, envtoken);
-    console.log('decodedToken', decodedToken);
+    // console.log('decodedToken', decodedToken);
 
-    const userId = decodedToken.id;
+    const userEmail = decodedToken.useremail;
+    console.log('userEmail', userEmail);
 
-    const { password, confirmPassword } = req.body;
+    const { password } = req.body;
 
-    const { error } = Joi.object({
-      password: Joi.string().min(8).required(),
-      confirmPassword: Joi.string()
-        .valid(Joi.ref('password'))
-        .required()
-        .strict()
-        .messages({
-          'any.only': 'Passwords do not match',
-        }),
-    }).validate({ password, confirmPassword });
-
-    if (error) {
+    const { err } = updatePassword.validate(password);
+    if (err) {
+      const errorMessage = err.details[0].message.replace(/['"]+/g, '');
       return res.status(400).json({
         status: false,
-        message: error.details[0].message,
+        message: errorMessage,
       });
     }
-
-    // Find the user by ID in the database
-    const userToUpdate = await userModel.findById(userId);
-
-    if (!userToUpdate) {
-      return res.status(404).json({
-        status: false,
-        message: 'User Not Found',
+    const result = await userModel.findOne({ email: userEmail });
+    console.log('result', result.password);
+    if (result) {
+      result.password = password;
+      console.log('result.password', result.password);
+      await result.save();
+      return res.status(200).json({
+        status: true,
+        message: 'Password updated',
       });
     }
-
-    // Update the user's password
-    userToUpdate.password = password;
-    await userToUpdate.save();
-
-    return res.status(200).json({
-      status: true,
-      message: 'Password Changed',
+    return res.status(404).json({
+      status: false,
+      message: 'User Not Found',
     });
   } catch (error) {
     return handleError(res, error);

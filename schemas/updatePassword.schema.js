@@ -4,7 +4,7 @@ module.exports = Joi.object({
   password: Joi.string()
     .min(8)
     .required(),
-  currentPAssword: Joi.string()
+  currentPAssword: Joi.string().valid(Joi.ref('password'))
     .min(8)
     .required(),
 });
