@@ -1,15 +1,17 @@
 // const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const Joi = require('@hapi/joi');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
+const dotenv = require('dotenv');
 const userData = require('../sampleData/data.json');
 const writeUsers = require('../sampleData/write.user');
 const registrationSchema = require('../schemas/registration.schema');
 const userUpdateSchema = require('../schemas/userupdate.schema');
 const updatePassword = require('../schemas/updatePassword.schema');
 
-// const { envtoken } = process.env;
-
+dotenv.config();
+const { envtoken } = process.env;
 let newOtp = null;
 exports.addNewUser = (req, res) => {
   try {
@@ -219,22 +221,30 @@ exports.sendOtp = async (req, res) => {
   }
 };
 
-exports.verifyotp = async (req, res) => {
+exports.verifyOtp = async (req, res) => {
   try {
-    const { otp } = req.body;
+    const { otp, email } = req.body;
     if (otp !== newOtp) {
       return res.status(400).json({
         status: false,
         message: 'Invalid OTP',
       });
     }
-    // Clear the OTP after successful verification
     newOtp = null;
+    const emailExist = await userData.find((value) => value.email === email);
+    const userEmail = emailExist.email;
+    console.log('userEmail', userEmail);
 
-    return res.status(200).json({
-      status: true,
-      message: 'OTP verified',
-    });
+    if (emailExist) {
+      const accessToken = jwt.sign({ userEmail }, envtoken, { expiresIn: '1h' });
+
+      return res.status(200).json({
+        status: true,
+        message: 'OTP verified',
+        accessToken,
+      });
+    }
+    // Generate an access token
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -244,10 +254,12 @@ exports.verifyotp = async (req, res) => {
     });
   }
 };
-
 exports.changepassword = (req, res) => {
   try {
-    const id = req.decodedId;
+    const token = req.headers.authorization;
+    const { userEmail } = jwt.verify(token, envtoken);
+    console.log('userEmail', userEmail);
+
     const { password, confirmPassword } = req.body;
     const { error } = Joi.object({
       password: Joi.string().min(8).required(),
@@ -263,15 +275,20 @@ exports.changepassword = (req, res) => {
         message: error.details[0].message,
       });
     }
-    const updatepassword = userData.find((data) => data.id === id);
-    if (!updatePassword) {
-      return res.status(400).json({
+
+    // Find the user by their email
+    const updateUser = userData.find((user) => user.email === userEmail);
+    if (!updateUser) {
+      return res.status(404).json({
         status: false,
         message: 'User Not Found',
       });
     }
-    updatepassword.password = password;
+
+    // Update the user's password
+    updateUser.password = password;
     writeUsers(userData);
+
     return res.status(200).json({
       status: true,
       message: 'Password Changed',
