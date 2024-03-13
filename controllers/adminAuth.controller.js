@@ -109,25 +109,35 @@ exports.deleteUser = async (req, res) => {
 
 exports.getuser = async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limitNumber = parseInt(req.query.page, 10) || 10;
-    const startIndex = (page - 1) * limitNumber;
-    const totalCount = await userModel.countDocuments();
-    const paginatedData = await userModel.find().skip(startIndex).limit(limitNumber);
-
+    const { page, limit, search } = req.query;
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { firstName: { $regex: new RegExp(search, 'i') } },
+          { lastName: { $regex: new RegExp(search, 'i') } },
+          { email: { $regex: new RegExp(search, 'i') } },
+        ],
+      };
+    }
+    const currentPage = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    const startIndex = (currentPage - 1) * limitNumber;
+    const totalCount = await userModel.countDocuments(query);
+    const paginatedData = await userModel.find(query).skip(startIndex).limit(limitNumber);
     res.status(200).json({
       status: true,
       message: 'Users data retrieved successfully',
-      currentPage: page,
+      currentPage,
       limit: limitNumber,
       totalCount,
       users: paginatedData,
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({
+    res.status(500).json({
       status: false,
-      message: 'Token is missing',
+      message: 'Internal server error',
     });
   }
 };

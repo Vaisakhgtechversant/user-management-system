@@ -12,5 +12,14 @@
     "email": "supervisor@gmail.com",
     "password": "supervisor@123456",
     "role": "supervisor"
+  },
+  {
+    "id": 1710303951733,
+    "createdAT": "2024-03-13T04:25:51.733Z",
+    "firstName": "demoqwe",
+    "lastName": "demo",
+    "email": "demo@techversantinfotech.com",
+    "password": "demo@123",
+    "role": "agent"
   }
 ]
