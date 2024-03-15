@@ -1,7 +1,9 @@
+const mongoose = require('mongoose');
+
 const registrationSchema = require('../schemas/registration.schema');
 const updateSchema = require('../schemas/update.schema');
 const userModel = require('../model/user.model');
-const { handleError } = require('../utils/serverError');
+// const { handleError } = require('../utils/serverError');
 
 exports.addUser = async (req, res) => {
   try {
@@ -37,9 +39,8 @@ exports.addUser = async (req, res) => {
       message: 'registration successful',
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
-      status: 'false',
+      status: false,
       message: 'internal server error',
     });
   }
@@ -76,32 +77,31 @@ exports.updateUser = async (req, res) => {
       message: 'updated',
     });
   } catch (error) {
-    return handleError(res);
+    return res.status(500).json({
+      status: false,
+      message: 'internal server error',
+    });
   }
 };
 
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    await userModel.deleteOne({ _id: userId }).then((data) => {
-      if (!data) {
-        return res.status(404).json({
-          status: 'false',
-          message: 'user not found',
-        });
-      }
+    const data = await userModel.deleteOne({ _id: userId });
+
+    if (data) {
       return res.status(200).json({
-        status: 'true',
+        status: true,
         message: 'deleted',
       });
-    });
-    return res.status(200).json({
-      status: 'true',
-      message: 'deleted',
+    }
+    return res.status(404).json({
+      status: false,
+      message: 'user not found',
     });
   } catch (error) {
     return res.status(500).json({
-      status: 'false',
+      status: false,
       message: 'internal server error',
     });
   }
@@ -125,6 +125,57 @@ exports.getuser = async (req, res) => {
     const startIndex = (currentPage - 1) * limitNumber;
     const totalCount = await userModel.countDocuments(query);
     const paginatedData = await userModel.find(query).skip(startIndex).limit(limitNumber);
+    res.status(200).json({
+      status: true,
+      message: 'Users data retrieved successfully',
+      currentPage,
+      limit: limitNumber,
+      totalCount,
+      users: paginatedData,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: 'internal server error',
+    });
+  }
+};
+
+exports.aggreeGet = async (req, res) => {
+  try {
+    const { page, limit, search } = req.query;
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { firstName: { $regex: new RegExp(search, 'i') } },
+          { lastName: { $regex: new RegExp(search, 'i') } },
+          { email: { $regex: new RegExp(search, 'i') } },
+        ],
+      };
+    }
+    const currentPage = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    const startIndex = (currentPage - 1) * limitNumber;
+    const pipeline = [
+      { $match: query },
+      { $skip: startIndex },
+      { $limit: limitNumber },
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+          password: 1,
+          role: 1,
+          email: 1,
+        },
+      },
+    ];
+    const [totalCount, paginatedData] = await Promise.all([
+      userModel.countDocuments(query),
+      userModel.aggregate(pipeline).exec(),
+    ]);
     res.status(200).json({
       status: true,
       message: 'Users data retrieved successfully',
@@ -166,4 +217,48 @@ exports.getOne = (req, res) => {
         message: 'Internal server error',
       });
     });
+};
+
+exports.getone = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    console.log(userId);
+    const pipeline = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+          password: 1,
+          role: 1,
+          email: 1,
+        },
+      },
+    ];
+    const data = await userModel.aggregate(pipeline);
+    console.log('data', data);
+    if (data) {
+      res.status(200).json({
+        status: true,
+        message: 'User retrieved successfully',
+        result: data,
+      });
+    } else {
+      res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      message: 'Internal server error',
+    });
+  }
 };

@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+
+const { ObjectId } = mongoose.Types;
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
@@ -66,6 +69,43 @@ exports.getone = async (req, res) => {
     });
   }
 };
+
+exports.getAggreone = async (req, res) => {
+  const userId = req.decodedId;
+  console.log(userId);
+  const pipeline = [
+    {
+      $match: {
+        _id: new ObjectId(userId),
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        password: 1,
+        role: 1,
+        email: 1,
+      },
+    },
+  ];
+  const value = await userModel.aggregate(pipeline);
+  console.log('value', value);
+  if (value) {
+    res.status(200).json({
+      status: true,
+      message: 'User retrieved successfully',
+      result: value,
+    });
+  } else {
+    res.status(404).json({
+      status: false,
+      message: 'User not found',
+    });
+  }
+};
+
 exports.updateUser = async (req, res) => {
   try {
     const id = req.decodedId;

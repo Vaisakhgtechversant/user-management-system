@@ -9,7 +9,11 @@ router.post('/login', adminController.login);
 
 router.post('/user', verifyUserRole, verifyAdmin, adminCanController.addUser);
 router.get('/users', verifyUserRole, verifyAdmin, adminCanController.getuser);
+router.get('/aggreusers', verifyUserRole, verifyAdmin, adminCanController.aggreeGet);
+
 router.get('/user/:id', verifyUserRole, verifyAdmin, adminCanController.getOne);
+router.get('/aggreuser/:id', verifyUserRole, verifyAdmin, adminCanController.getone);
+
 router.put('/update/:id', verifyUserRole, verifyAdmin, adminCanController.updateUser);
 router.delete('/delete/:id', verifyUserRole, verifyAdmin, adminCanController.deleteUser);
 
