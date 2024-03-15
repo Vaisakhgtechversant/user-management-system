@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.post('/addProdt', verifyUserRole, verifyAdmin, adminProduct.addProduct);
 router.get('/getProdt', verifyUserRole, verifyAdmin, adminProduct.getProduct);
+router.put('/updateProdt', verifyUserRole, verifyAdmin, adminProduct.updateProduct);
 
 module.exports = router;

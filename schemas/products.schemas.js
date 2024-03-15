@@ -29,6 +29,7 @@ module.exports = Joi.object({
     .pattern(/^[a-zA-Z0-9 ]+$/).message('last name must contain only alphabetic characters')
     .min(1)
     .required(),
+  imageURL: Joi.string().required(),
   role: Joi.string()
     .valid('admin')
     .required(),

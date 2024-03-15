@@ -37,6 +37,9 @@ const productModel = mongoose.Schema({
     require: true,
     type: String,
   },
+  image: {
+    type: Buffer,
+  },
   role: {
     require: true,
     type: String,
