@@ -1,76 +1,68 @@
-// const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+
+const { ObjectId } = mongoose.Types;
 const jwt = require('jsonwebtoken');
-const Joi = require('@hapi/joi');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
 const dotenv = require('dotenv');
-const userData = require('../sampleData/data.json');
-const writeUsers = require('../sampleData/write.user');
-const registrationSchema = require('../schemas/registration.schema');
+const userModel = require('../model/user.model');
+const userRegistrationSchema = require('../schemas/userRegistration.schema');
 const userUpdateSchema = require('../schemas/userupdate.schema');
 const updatePassword = require('../schemas/updatePassword.schema');
+const { handleError } = require('../utils/serverError');
 
 dotenv.config();
 const { envtoken } = process.env;
 let newOtp = null;
-exports.addNewUser = (req, res) => {
+exports.addNewUser = async (req, res) => {
   try {
-    const { error } = registrationSchema.validate(req.body);
+    const { error } = userRegistrationSchema.validate(req.body);
     if (error) {
       return res.status(400).send(error.details[0].message);
     }
-    const { email, password, role } = req.body;
-    if (!email || !password || !role) {
-      return res.status(400).json({
-        status: 'false',
-        message: 'email, password, and role are required',
-      });
-    }
-    if (req.body.role !== 'agent') {
-      return res.status(403).json({
-        status: 'false',
-        message: 'only agent role is available',
-      });
-    }
-    const newUser = { id: new Date().getTime(), createdAT: new Date(), ...req.body };
-    const emailExist = userData.find((value) => value.email === newUser.email);
-    if (emailExist) {
+    const existingUser = await userModel.findOne({ email: req.body.email });
+    if (existingUser) {
       return res.status(409).json({
-        status: 'false',
-        message: 'email is already exist',
+        status: false,
+        message: 'Email already exists',
       });
     }
-    userData.push(newUser);
-    writeUsers(userData);
+    const {
+      firstName, lastName, email, password, role,
+    } = req.body;
+    await userModel.create({
+      firstName, lastName, email, password, role,
+    });
     return res.status(201).json({
       status: 'true',
       message: 'registration successful',
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: 'false',
-      message: 'token missing or invalid',
-    });
+    return handleError(res);
   }
 };
-exports.getone = (req, res) => {
+
+exports.getone = async (req, res) => {
   try {
-    const id = req.decodedId;
-    const getOne = userData.find((data) => data.id === id);
-    if (getOne) {
-      res.status(200).json({
-        status: true,
-        message: 'user retrieved successfully',
-        data: getOne,
-      });
-    } else {
-      res.status(404).json({
-        status: false,
-        message: 'user not found',
-      });
-    }
+    console.log('hi');
+    const userId = req.decodedId;
+    console.log('userId', userId);
+    await userModel.findOne({ _id: userId }).then((data) => {
+      if (data) {
+        res.status(200).json({
+          status: true,
+          message: 'user retrieved successfully',
+          result: data,
+        });
+      } else {
+        res.status(404).json({
+          status: false,
+          message: 'user not found',
+        });
+      }
+    });
   } catch (error) {
+    console.log('hi');
     res.status(400).json({
       status: 'false',
       message: 'internal server error',
@@ -78,9 +70,46 @@ exports.getone = (req, res) => {
   }
 };
 
-exports.updateUser = (req, res) => {
+exports.getAggreone = async (req, res) => {
+  const userId = req.decodedId;
+  console.log(userId);
+  const pipeline = [
+    {
+      $match: {
+        _id: new ObjectId(userId),
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        password: 1,
+        role: 1,
+        email: 1,
+      },
+    },
+  ];
+  const value = await userModel.aggregate(pipeline);
+  console.log('value', value);
+  if (value) {
+    res.status(200).json({
+      status: true,
+      message: 'User retrieved successfully',
+      result: value,
+    });
+  } else {
+    res.status(404).json({
+      status: false,
+      message: 'User not found',
+    });
+  }
+};
+
+exports.updateUser = async (req, res) => {
   try {
     const id = req.decodedId;
+    console.log('id', id);
     const updateUser = req.body;
     const { error } = userUpdateSchema.validate(updateUser);
     if (error) {
@@ -90,32 +119,25 @@ exports.updateUser = (req, res) => {
         message: errorMessage,
       });
     }
-    const index = userData.findIndex((data) => data.id === id);
-    if (index !== -1) {
-      userData[index] = { ...userData[index], ...updateUser };
-      writeUsers(userData);
-      return res.status(200).json({
-        status: 'true',
-        message: 'Updated',
-      });
+    if (req.file) {
+      const imageBuffer = req.file.buffer;
+      await userModel.updateOne({ _id: id }, { $set: { image: imageBuffer, ...updateUser } });
+    } else {
+      await userModel.updateOne({ _id: id }, { $set: updateUser });
     }
-    return res.status(404).json({
-      status: 'false',
-      message: 'User Not Found',
+    return res.status(200).json({
+      status: 'true',
+      message: 'updated',
     });
   } catch (error) {
-    return res.status(500).json({
-      status: 'false',
-      message: 'Internal Server Error',
-    });
+    return handleError(res);
   }
 };
 
-exports.updatePassword = (req, res) => {
+exports.updatePassword = async (req, res) => {
   try {
-    const id = req.decodedId;
-    const { currentPassword } = req.body;
-    const { password } = req.body;
+    const userId = req.decodedId;
+    const { currentPassword, password } = req.body;
     const { err } = updatePassword.validate(password);
     if (err) {
       const errorMessage = err.details[0].message.replace(/['"]+/g, '');
@@ -124,30 +146,21 @@ exports.updatePassword = (req, res) => {
         message: errorMessage,
       });
     }
-    const userToUpdate = userData.find((user) => user.id === id);
+    const userToUpdate = await userModel.findById(userId);
     if (!userToUpdate) {
       return res.status(404).json({
         status: false,
         message: 'User Not Found',
       });
     }
-    const { error } = Joi.string().min(8).validate(password);
-    if (error) {
-      const errorMessage = err.details[0].message.replace(/['"]+/g, '');
+    if (currentPassword !== userToUpdate.password) {
       return res.status(400).json({
         status: false,
-        message: errorMessage,
-      });
-    }
-    const currentpassword = userData.find((data) => data.password === currentPassword);
-    if (!currentpassword) {
-      res.status(400).json({
-        status: false,
-        message: 'current passowrd is wrong',
+        message: 'Current password is wrong',
       });
     }
     userToUpdate.password = password;
-    writeUsers(userData);
+    await userToUpdate.save();
     return res.status(200).json({
       status: true,
       message: 'Password updated',
@@ -155,7 +168,7 @@ exports.updatePassword = (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: false,
-      message: 'password length minimum 8',
+      message: 'Internal Server Error',
     });
   }
 };
@@ -169,140 +182,121 @@ exports.sendOtp = async (req, res) => {
         message: 'Email is required',
       });
     }
-    newOtp = await otpGenerator.generate(6, {
+    newOtp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       specialChars: false,
       alphabets: false,
     });
-    const userToUpdate = userData.find((user) => user.email === email);
-    if (!userToUpdate) {
-      return res.status(400).json({
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
         status: false,
-        message: 'User Not Found',
+        message: 'User not found',
       });
     }
-    const transporter = await nodemailer.createTransport({
+    user.otp = newOtp;
+    await user.save();
+
+    // Send OTP via email
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: 'vaisakhg30@gmail.com',
         pass: 'oiadmibebbronett',
       },
     });
+
     const mailOptions = {
       from: 'ums@gmail.com',
       to: email,
       subject: 'OTP to reset password',
       text: newOtp,
     };
+
     transporter.sendMail(mailOptions, (error) => {
       if (error) {
-        res.status(500).json({
+        return res.status(500).json({
           status: false,
           message: 'Failed to send OTP',
           error: error.message,
         });
-      } else {
-        res.status(200).json({
-          status: true,
-          message: 'OTP sent successfully',
-        });
       }
+      return res.status(200).json({
+        status: true,
+        message: 'OTP sent successfully',
+      });
     });
     return res.status(200).json({
       status: true,
       message: 'OTP sent successfully',
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal server error',
-      error,
-    });
+    return handleError(res, error);
   }
 };
 
-exports.verifyOtp = async (req, res) => {
+exports.verifyotp = async (req, res) => {
   try {
-    const { otp, email } = req.body;
-    if (otp !== newOtp) {
-      return res.status(400).json({
-        status: false,
-        message: 'Invalid OTP',
-      });
-    }
-    newOtp = null;
-    const emailExist = await userData.find((value) => value.email === email);
-    const userEmail = emailExist.email;
-    console.log('userEmail', userEmail);
-
-    if (emailExist) {
-      const accessToken = jwt.sign({ userEmail }, envtoken, { expiresIn: '1h' });
-
+    const { Otp, useremail } = req.body;
+    console.log('Otp', Otp);
+    console.log('useremail', useremail);
+    const user = await userModel.findOne({ email: useremail, otp: Otp });
+    if (user) {
+      const accessToken = jwt.sign({ useremail, Otp }, envtoken, { expiresIn: '1h' });
+      await userModel.findOneAndUpdate(
+        { email: useremail },
+        { $unset: { otp: '' } },
+      );
       return res.status(200).json({
         status: true,
         message: 'OTP verified',
         accessToken,
       });
     }
-    return res.status(404).json({
+    return res.status(400).json({
       status: false,
-      message: 'User not found',
+      message: 'Invalid OTP',
     });
-
-    // Generate an access token
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: false,
-      message: 'Internal server error',
-      error: error.message,
-    });
+    return handleError(res, error);
   }
 };
-exports.changepassword = (req, res) => {
+
+exports.changepassword = async (req, res) => {
   try {
-    const token = req.headers.authorization;
-    const { userEmail } = jwt.verify(token, envtoken);
+    const accessToken = req.headers.authorization;
+    const decodedToken = jwt.verify(accessToken, envtoken);
+    // console.log('decodedToken', decodedToken);
+
+    const userEmail = decodedToken.useremail;
     console.log('userEmail', userEmail);
 
-    const { password, confirmPassword } = req.body;
-    const { error } = Joi.object({
-      password: Joi.string().min(8).required(),
-      confirmPassword: Joi.string().valid(Joi.ref('password')).required().strict()
-        .messages({
-          'any.only': 'Passwords do not match',
-        }),
-    }).validate({ password, confirmPassword });
+    const { password } = req.body;
 
-    if (error) {
+    const { err } = updatePassword.validate(password);
+    if (err) {
+      const errorMessage = err.details[0].message.replace(/['"]+/g, '');
       return res.status(400).json({
         status: false,
-        message: error.details[0].message,
+        message: errorMessage,
       });
     }
-
-    // Find the user by their email
-    const updateUser = userData.find((user) => user.email === userEmail);
-    if (!updateUser) {
-      return res.status(404).json({
-        status: false,
-        message: 'User Not Found',
+    const result = await userModel.findOne({ email: userEmail });
+    console.log('result', result.password);
+    if (result) {
+      result.password = password;
+      console.log('result.password', result.password);
+      await result.save();
+      return res.status(200).json({
+        status: true,
+        message: 'Password updated',
       });
     }
-
-    // Update the user's password
-    updateUser.password = password;
-    writeUsers(userData);
-
-    return res.status(200).json({
-      status: true,
-      message: 'Password Changed',
+    return res.status(404).json({
+      status: false,
+      message: 'User Not Found',
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
+    return handleError(res, error);
   }
 };

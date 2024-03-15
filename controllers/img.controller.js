@@ -6,7 +6,7 @@ exports.saveBlog = async (req, res) => {
     res.status(200).json({
       status: true,
       message: 'upload success',
-      imageURL: req.body.imageURL,
+      imageURL: req.body.buffer,
     });
   } catch (error) {
     console.error(error);
