@@ -49,7 +49,6 @@ exports.addUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
-
     const updateUser = req.body;
 
     const { error } = updateSchema.validate(updateUser);
@@ -60,21 +59,19 @@ exports.updateUser = async (req, res) => {
         message: errorMessage,
       });
     }
-    await userModel.updateOne({ _id: userId }, { $set: req.body }).then((data) => {
-      if (!data) {
-        return res.status(404).json({
-          status: 'false',
-          message: 'user not found',
-        });
-      }
-      return res.status(200).json({
-        status: 'true',
-        message: 'updated',
+
+    const data = await userModel.updateOne({ _id: userId }, { $set: req.body });
+
+    if (!data) {
+      return res.status(404).json({
+        status: false,
+        message: 'user not found',
       });
-    });
+    }
+
     return res.status(200).json({
-      status: 'true',
-      message: 'updated',
+      status: true,
+      message: 'user update successfully',
     });
   } catch (error) {
     return res.status(500).json({
