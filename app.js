@@ -5,6 +5,7 @@ const cors = require('cors');
 const adminRouter = require('./routes/admin.router');
 const userRouter = require('./routes/user.router');
 const imgRouter = require('./routes/img.router');
+const productRouter = require('./routes/products.router');
 
 dotenv.config();
 const server = express();
@@ -16,6 +17,8 @@ server.listen(8000, () => {
 });
 server.use('/api', adminRouter);
 server.use('/api', userRouter);
+server.use('/api', productRouter);
+
 server.use('/image', imgRouter);
 
 // set page not found
