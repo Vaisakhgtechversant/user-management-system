@@ -343,6 +343,8 @@ exports.getCartItems = async (req, res) => {
   try {
     const userId = req.decodedId;
     const user = await userModel.findById(userId);
+    // const { _id } = user.cart[0];
+    // console.log(_id);
     if (!user) {
       return res.status(404).json({
         status: false,
@@ -353,6 +355,40 @@ exports.getCartItems = async (req, res) => {
       status: true,
       message: 'Cart items retrieved successfully',
       cart: user.cart,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+exports.deleteCart = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const cartId = req.params; // Access cartId correctly
+
+    console.log('delete');
+
+    const user = await userModel.findById(userId);
+    const { _id } = user.cart[0]; // Use _id instead of id
+    console.log('id', _id);
+
+    // Correct syntax for deleteOne method
+    const data = await userModel.deleteOne({ _id: cartId });
+
+    console.log('datas', data);
+
+    if (data) {
+      return res.status(200).json({
+        status: true,
+        message: 'Deleted',
+      });
+    }
+    return res.status(404).json({
+      status: false,
+      message: 'User not found',
     });
   } catch (error) {
     return res.status(500).json({

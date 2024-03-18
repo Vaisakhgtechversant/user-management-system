@@ -11,12 +11,15 @@ exports.addProduct = async (req, res) => {
         message: errorMessage,
       });
     }
-    const imageBuffer = req.file.buffer;
+    let imageBuffer = null;
+    if (req.file) {
+      imageBuffer = req.file.buffer;
+    }
     const {
       productName, productPrice, productDetails,
       category, availability, productCode, quantity, role,
     } = req.body;
-    await productModel.create({
+    const productData = {
       productName,
       productPrice,
       productDetails,
@@ -25,8 +28,11 @@ exports.addProduct = async (req, res) => {
       productCode,
       quantity,
       role,
-      image: imageBuffer,
-    });
+    };
+    if (imageBuffer) {
+      productData.image = imageBuffer;
+    }
+    await productModel.create(productData);
     return res.status(201).json({
       status: 'true',
       message: 'product added successful',
