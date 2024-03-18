@@ -16,4 +16,8 @@ router.put('/me/update-password', verifyUserRole, verifyUser, userAuthController
 router.post('/me/forgotpassword', userAuthController.sendOtp);
 router.post('/me/verifyotp', userAuthController.verifyotp);
 router.post('/me/changepassword', userAuthController.changepassword);
+
+router.post('/add-to-cart/:productId', verifyUser, userAuthController.addToCart);
+router.post('/add-to-wishlist/:productId', verifyUser, userAuthController.addToWishlist);
+router.get('/cart', verifyUser, userAuthController.getCartItems);
 module.exports = router;

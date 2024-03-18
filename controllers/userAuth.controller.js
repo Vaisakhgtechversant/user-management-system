@@ -10,6 +10,7 @@ const userRegistrationSchema = require('../schemas/userRegistration.schema');
 const userUpdateSchema = require('../schemas/userupdate.schema');
 const updatePassword = require('../schemas/updatePassword.schema');
 const { handleError } = require('../utils/serverError');
+const productModel = require('../model/products.model');
 
 dotenv.config();
 const { envtoken } = process.env;
@@ -298,5 +299,104 @@ exports.changepassword = async (req, res) => {
     });
   } catch (error) {
     return handleError(res, error);
+  }
+};
+
+exports.addToCart = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const { productId } = req.params;
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+    }
+    const existingCartItem = user.cart.find((item) => item.product.toString() === productId);
+    if (existingCartItem) {
+      existingCartItem.quantity += 1;
+    } else {
+      user.cart.push({ product: productId, quantity: 1 });
+    }
+    await user.save();
+    return res.status(200).json({
+      status: true,
+      message: 'Product added to cart successfully',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+exports.getCartItems = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+    return res.status(200).json({
+      status: true,
+      message: 'Cart items retrieved successfully',
+      cart: user.cart,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+exports.addToWishlist = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const { productId } = req.params;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+    }
+    if (user.wishlist.includes(productId)) {
+      return res.status(400).json({
+        status: false,
+        message: 'Product already exists in the wishlist',
+      });
+    }
+    user.wishlist.push(productId);
+    await user.save();
+    return res.status(200).json({
+      status: true,
+      message: 'Product added to wishlist successfully',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal Server Error',
+    });
   }
 };
