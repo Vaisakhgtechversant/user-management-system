@@ -35,5 +35,20 @@ const userModel = mongoose.Schema({
     require: true,
     type: String,
   },
+  cart: [{
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'producttable', // Reference to the Product model
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      default: 1, // Default quantity is 1
+    },
+  }],
+  wishlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'producttable',
+  }],
 });
 module.exports = mongoose.model('usertable', userModel);

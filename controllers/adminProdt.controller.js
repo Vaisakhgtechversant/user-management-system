@@ -29,7 +29,7 @@ exports.addProduct = async (req, res) => {
     });
     return res.status(201).json({
       status: 'true',
-      message: 'registration successful',
+      message: 'product added successful',
     });
   } catch (error) {
     return res.status(500).json({
@@ -41,20 +41,33 @@ exports.addProduct = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
   try {
-    const result = await productModel.find();
-    if (result) {
-      res.status(400).json({
-        status: true,
-        data: result,
-      });
-    } else {
-      res.status(400).json({
-        status: false,
-        message: 'not found',
-      });
+    const { page, limit, search } = req.query;
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { firstName: { $regex: new RegExp(search, 'i') } },
+          { lastName: { $regex: new RegExp(search, 'i') } },
+          { email: { $regex: new RegExp(search, 'i') } },
+        ],
+      };
     }
+    const currentPage = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    const startIndex = (currentPage - 1) * limitNumber;
+    const totalCount = await productModel.countDocuments(query);
+    const paginatedData = await productModel.find(query).skip(startIndex).limit(limitNumber);
+    // const result = await productModel.find();
+    res.status(200).json({
+      status: true,
+      message: 'Users data retrieved successfully',
+      currentPage,
+      limit: limitNumber,
+      totalCount,
+      products: paginatedData,
+    });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       status: false,
       message: 'internal server error',
     });
@@ -77,7 +90,7 @@ exports.updateProduct = async (req, res) => {
     if (result) {
       return res.status(200).json({
         status: true,
-        message: 'updated success',
+        message: 'product updated Successfully',
         data: result,
       });
     }
