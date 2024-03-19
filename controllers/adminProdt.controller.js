@@ -17,7 +17,7 @@ exports.addProduct = async (req, res) => {
     }
     const {
       productName, productPrice, productDetails,
-      category, availability, productCode, quantity, role,
+      category, availability, productCode, quantity,
     } = req.body;
     const productData = {
       productName,
@@ -27,7 +27,6 @@ exports.addProduct = async (req, res) => {
       availability,
       productCode,
       quantity,
-      role,
     };
     if (imageBuffer) {
       productData.image = imageBuffer;
