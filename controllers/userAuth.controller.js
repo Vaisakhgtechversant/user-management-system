@@ -364,39 +364,38 @@ exports.getCartItems = async (req, res) => {
   }
 };
 
-exports.deleteCart = async (req, res) => {
-  try {
-    const userId = req.decodedId;
-    const cartId = req.params; // Access cartId correctly
+// exports.deleteCart = async (req, res) => {
+//   try {
+//     const userId = req.decodedId;
+//     const { cartId } = req.params; // Access cartId correctly
 
-    console.log('delete');
+//     console.log('delete');
 
-    const user = await userModel.findById(userId);
-    const id  = user.cart[0]._id; // Use _id instead of id
-    // console.log('id', _id);
+//     const user = await userModel.findById(userId);
+//     // const id = user.cart[0]._id; // Access the _id property of the cart
+//     // console.log('id', id);
 
-    // Correct syntax for deleteOne method
+//     // Correct syntax for deleteOne method
+//     const data = await userModel.deleteOne({ user.cart[0]._id: cartId }); // Use _id instead of id
+//     console.log('datas', data);
 
-    const data = await userModel.deleteOne({ id: cartId });
-    console.log('datas', data);
-
-    if (data) {
-      return res.status(200).json({
-        status: true,
-        message: 'Deleted',
-      });
-    }
-    return res.status(404).json({
-      status: false,
-      message: 'User not found',
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
-  }
-};
+//     if (data) {
+//       return res.status(200).json({
+//         status: true,
+//         message: 'Deleted',
+//       });
+//     }
+//     return res.status(404).json({
+//       status: false,
+//       message: 'Cart not found',
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       status: false,
+//       message: 'Internal Server Error',
+//     });
+//   }
+// };
 
 exports.addToWishlist = async (req, res) => {
   try {

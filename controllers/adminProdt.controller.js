@@ -80,21 +80,26 @@ exports.getProduct = async (req, res) => {
 };
 
 exports.singleProduct = async (req, res) => {
-  const productId = req.params.id;
-  await productModel.findOne({ _id: productId }).then((data) => {
+  try {
+    const productId = req.params.id;
+    const data = await productModel.findOne({ _id: productId });
     if (data) {
-      res.status(200).json({
+      return res.status(200).json({
         status: true,
         messsage: 'data retrived success',
         result: data,
       });
-    } else {
-      res.status(404).json({
-        status: false,
-        message: 'data not found',
-      });
     }
-  });
+    return res.status(404).json({
+      status: false,
+      message: 'data not found',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'internal server error',
+    });
+  }
 };
 
 exports.updateProduct = async (req, res) => {
@@ -124,6 +129,29 @@ exports.updateProduct = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
+      status: false,
+      message: 'internal server error',
+    });
+  }
+};
+
+exports.deleteProducts = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const result = await productModel.deleteOne({ _id: productId });
+    if (result) {
+      res.status(200).json({
+        status: true,
+        message: 'rpoduct deleted',
+      });
+    } else {
+      res.status(400).json({
+        status: false,
+        message: 'product not found',
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
       status: false,
       message: 'internal server error',
     });
