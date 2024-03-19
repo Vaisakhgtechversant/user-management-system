@@ -79,6 +79,24 @@ exports.getProduct = async (req, res) => {
   }
 };
 
+exports.singleProduct = async (req, res) => {
+  const productId = req.params.id;
+  await productModel.findOne({ _id: productId }).then((data) => {
+    if (data) {
+      res.status(200).json({
+        status: true,
+        messsage: 'data retrived success',
+        result: data,
+      });
+    } else {
+      res.status(404).json({
+        status: false,
+        message: 'data not found',
+      });
+    }
+  });
+};
+
 exports.updateProduct = async (req, res) => {
   try {
     const userId = req.params.id;

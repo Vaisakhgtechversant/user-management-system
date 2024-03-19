@@ -372,12 +372,12 @@ exports.deleteCart = async (req, res) => {
     console.log('delete');
 
     const user = await userModel.findById(userId);
-    const { _id } = user.cart[0]; // Use _id instead of id
-    console.log('id', _id);
+    const id  = user.cart[0]._id; // Use _id instead of id
+    // console.log('id', _id);
 
     // Correct syntax for deleteOne method
-    const data = await userModel.deleteOne({ _id: cartId });
 
+    const data = await userModel.deleteOne({ id: cartId });
     console.log('datas', data);
 
     if (data) {
