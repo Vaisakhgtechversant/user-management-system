@@ -343,18 +343,30 @@ exports.getCartItems = async (req, res) => {
   try {
     const userId = req.decodedId;
     const user = await userModel.findById(userId);
-    // const { _id } = user.cart[0];
-    // console.log(_id);
     if (!user) {
       return res.status(404).json({
         status: false,
         message: 'User not found',
       });
     }
+
+    // Access the cart items of the user
+    const { page, limit } = req.query;
+    const currentPage = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    const startIndex = (currentPage - 1) * limitNumber;
+
+    // Paginate the cart items
+    const cartItemCount = user.cart.length;
+    const paginatedCartItems = user.cart.slice(startIndex, startIndex + limitNumber);
+
     return res.status(200).json({
       status: true,
       message: 'Cart items retrieved successfully',
-      cart: user.cart,
+      currentPage,
+      limit: limitNumber,
+      totalCount: cartItemCount,
+      cartItems: paginatedCartItems,
     });
   } catch (error) {
     return res.status(500).json({
@@ -459,18 +471,26 @@ exports.getWishlist = async (req, res) => {
   try {
     const userId = req.decodedId;
     const user = await userModel.findById(userId);
-    // const { _id } = user.cart[0];
-    // console.log(_id);
     if (!user) {
       return res.status(404).json({
         status: false,
         message: 'User not found',
       });
     }
+    const { page, limit } = req.query;
+    const currentPage = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    const startIndex = (currentPage - 1) * limitNumber;
+    const cartItemCount = user.wishlist.length;
+    const paginatedCartItems = user.wishlist.slice(startIndex, startIndex + limitNumber);
+
     return res.status(200).json({
       status: true,
       message: 'Cart items retrieved successfully',
-      cart: user.wishlist,
+      currentPage,
+      limit: limitNumber,
+      totalCount: cartItemCount,
+      wishlistItems: paginatedCartItems,
     });
   } catch (error) {
     return res.status(500).json({
