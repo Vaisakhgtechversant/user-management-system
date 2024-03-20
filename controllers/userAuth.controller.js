@@ -45,29 +45,22 @@ exports.addNewUser = async (req, res) => {
 
 exports.getone = async (req, res) => {
   try {
-    console.log('hi');
     const userId = req.decodedId;
-    console.log('userId', userId);
-    await userModel.findOne({ _id: userId }).then((data) => {
-      if (data) {
-        res.status(200).json({
-          status: true,
-          message: 'user retrieved successfully',
-          result: data,
-        });
-      } else {
-        res.status(404).json({
-          status: false,
-          message: 'user not found',
-        });
-      }
+    const data = await userModel.findOne({ _id: userId });
+    if (data) {
+      return res.status(200).json({
+        status: true,
+        message: 'user retrieved successfully',
+        result: data,
+      });
+    }
+    return res.status(404).json({
+      status: false,
+      message: 'user not found',
     });
   } catch (error) {
     console.log('hi');
-    res.status(400).json({
-      status: 'false',
-      message: 'internal server error',
-    });
+    return handleError(res);
   }
 };
 
@@ -94,17 +87,13 @@ exports.getAggreone = async (req, res) => {
   const value = await userModel.aggregate(pipeline);
   console.log('value', value);
   if (value) {
-    res.status(200).json({
+    return res.status(200).json({
       status: true,
       message: 'User retrieved successfully',
       result: value,
     });
-  } else {
-    res.status(404).json({
-      status: false,
-      message: 'User not found',
-    });
   }
+  return handleError(res);
 };
 
 exports.updateUser = async (req, res) => {
@@ -167,10 +156,7 @@ exports.updatePassword = async (req, res) => {
       message: 'Password updated',
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
+    return handleError(res);
   }
 };
 
@@ -369,10 +355,7 @@ exports.getCartItems = async (req, res) => {
       cartItems: paginatedCartItems,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
+    return handleError(res);
   }
 };
 
@@ -421,10 +404,7 @@ exports.deleteCart = async (req, res) => {
     // }
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
+    return handleError(res);
   }
 };
 
@@ -460,10 +440,7 @@ exports.addToWishlist = async (req, res) => {
       message: 'Product added to wishlist successfully',
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
+    return handleError(res);
   }
 };
 
@@ -493,10 +470,7 @@ exports.getWishlist = async (req, res) => {
       wishlistItems: paginatedCartItems,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
+    return handleError(res);
   }
 };
 
@@ -538,10 +512,6 @@ exports.deleteWishlist = async (req, res) => {
     });
     // }
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      status: false,
-      message: 'Internal Server Error',
-    });
+    return handleError(res);
   }
 };

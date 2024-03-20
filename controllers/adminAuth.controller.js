@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const registrationSchema = require('../schemas/registration.schema');
 const updateSchema = require('../schemas/update.schema');
 const userModel = require('../model/user.model');
-// const { handleError } = require('../utils/serverError');
+const { handleError } = require('../utils/serverError');
 
 exports.addUser = async (req, res) => {
   try {
@@ -39,10 +39,7 @@ exports.addUser = async (req, res) => {
       message: 'registration successful',
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'internal server error',
-    });
+    return handleError(res);
   }
 };
 
@@ -68,16 +65,12 @@ exports.updateUser = async (req, res) => {
         message: 'user not found',
       });
     }
-
     return res.status(200).json({
       status: true,
       message: 'user update successfully',
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'internal server error',
-    });
+    return handleError(res);
   }
 };
 
@@ -97,10 +90,7 @@ exports.deleteUser = async (req, res) => {
       message: 'user not found',
     });
   } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: 'internal server error',
-    });
+    return handleError(res);
   }
 };
 
@@ -131,10 +121,7 @@ exports.getuser = async (req, res) => {
       users: paginatedData,
     });
   } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: 'internal server error',
-    });
+    handleError(res);
   }
 };
 
@@ -173,7 +160,7 @@ exports.aggreeGet = async (req, res) => {
       userModel.countDocuments(query),
       userModel.aggregate(pipeline).exec(),
     ]);
-    res.status(200).json({
+    return res.status(200).json({
       status: true,
       message: 'Users data retrieved successfully',
       currentPage,
@@ -182,38 +169,28 @@ exports.aggreeGet = async (req, res) => {
       users: paginatedData,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: false,
-      message: 'Internal server error',
-    });
+    return handleError(res);
   }
 };
 
 exports.getOne = (req, res) => {
-  const userId = req.params.id;
-  userModel.findOne({ _id: userId })
-    .then((data) => {
-      if (data) {
-        res.status(200).json({
-          status: true,
-          message: 'User retrieved successfully',
-          result: data,
-        });
-      } else {
-        res.status(404).json({
-          status: false,
-          message: 'User not found',
-        });
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({
-        status: false,
-        message: 'Internal server error',
+  try {
+    const userId = req.params.id;
+    const data = userModel.findOne({ _id: userId });
+    if (data) {
+      return res.status(200).json({
+        status: true,
+        message: 'User retrieved successfully',
+        result: data,
       });
+    }
+    return res.status(404).json({
+      status: false,
+      message: 'User not found',
     });
+  } catch (error) {
+    return handleError(res);
+  }
 };
 
 exports.getone = async (req, res) => {
@@ -238,24 +215,20 @@ exports.getone = async (req, res) => {
       },
     ];
     const data = await userModel.aggregate(pipeline);
-    console.log('data', data);
     if (data) {
-      res.status(200).json({
+      return res.status(200).json({
         status: true,
         message: 'User retrieved successfully',
         result: data,
       });
-    } else {
-      res.status(404).json({
-        status: false,
-        message: 'User not found',
-      });
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
+    return res.status(404).json({
       status: false,
-      message: 'Internal server error',
+      message: 'User not found',
     });
+  } catch (error) {
+    return handleError(res);
   }
 };
+
+exports.validateUserRegistration = registrationSchema;
