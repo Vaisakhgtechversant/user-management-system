@@ -375,7 +375,7 @@ exports.deleteCart = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         status: false,
-        message: 'User not found',
+        message: 'cart not found',
       });
     }
 
@@ -399,12 +399,12 @@ exports.deleteCart = async (req, res) => {
     if (data) {
       return res.status(200).json({
         status: true,
-        message: 'Deleted',
+        message: 'cart deleted',
       });
     }
     return res.status(404).json({
       status: false,
-      message: 'User not found',
+      message: 'cart not found',
     });
     // }
   } catch (error) {
@@ -448,6 +448,77 @@ exports.addToWishlist = async (req, res) => {
       message: 'Product added to wishlist successfully',
     });
   } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+exports.getWishlist = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const user = await userModel.findById(userId);
+    // const { _id } = user.cart[0];
+    // console.log(_id);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+    return res.status(200).json({
+      status: true,
+      message: 'Cart items retrieved successfully',
+      cart: user.wishlist,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+exports.deleteWishlist = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const wishlistId = req.params; // Access cartId correctly
+
+    const user = await userModel.findById(userId);
+    console.log(user.wishlist);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'wishlist not found',
+      });
+    }
+    const { _id } = user.wishlist[0];
+    console.log('id', _id);
+    const data = await userModel.updateOne(
+      {},
+      {
+        $pull: {
+          wishlist: new ObjectId(wishlistId),
+        },
+      },
+      {
+        multi: true,
+      },
+    );
+    if (data) {
+      return res.status(200).json({
+        status: true,
+        message: 'wishlist deleted',
+      });
+    }
+    return res.status(404).json({
+      status: false,
+      message: 'wishlist not found',
+    });
+    // }
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: false,
       message: 'Internal Server Error',

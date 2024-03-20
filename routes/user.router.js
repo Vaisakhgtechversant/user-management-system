@@ -20,5 +20,8 @@ router.post('/me/changepassword', userAuthController.changepassword);
 router.post('/add-to-cart/:productId', verifyUser, userAuthController.addToCart);
 router.post('/add-to-wishlist/:productId', verifyUser, userAuthController.addToWishlist);
 router.get('/cart', verifyUser, userAuthController.getCartItems);
+router.get('/wishlist', verifyUser, userAuthController.getWishlist);
 router.delete('/delete-cart/:id', verifyUser, userAuthController.deleteCart);
+router.delete('/delete-wishist/:id', verifyUser, userAuthController.deleteWishlist);
+
 module.exports = router;
