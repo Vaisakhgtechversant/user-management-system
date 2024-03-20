@@ -51,9 +51,8 @@ exports.getProduct = async (req, res) => {
     if (search) {
       query = {
         $or: [
-          { firstName: { $regex: new RegExp(search, 'i') } },
-          { lastName: { $regex: new RegExp(search, 'i') } },
-          { email: { $regex: new RegExp(search, 'i') } },
+          { category: { $regex: new RegExp(search, 'i') } },
+          { productName: { $regex: new RegExp(search, 'i') } },
         ],
       };
     }
@@ -142,7 +141,7 @@ exports.deleteProducts = async (req, res) => {
     if (result) {
       res.status(200).json({
         status: true,
-        message: 'rpoduct deleted',
+        message: 'product deleted',
       });
     } else {
       res.status(400).json({

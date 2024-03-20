@@ -10,5 +10,6 @@ router.post('/addProdt', verifyUserRole, verifyAdmin, UploadPost.UploadImage, ad
 router.get('/getProdt', verifyAdmin, adminProduct.getProduct);
 router.get('/get-one/:id', verifyAdmin, adminProduct.singleProduct);
 router.put('/updateProdt/:id', verifyUserRole, verifyAdmin, UploadPost.UploadImage, adminProduct.updateProduct);
+router.delete('/deleteProduct/:id', verifyUserRole, verifyAdmin, adminProduct.deleteProducts);
 
 module.exports = router;

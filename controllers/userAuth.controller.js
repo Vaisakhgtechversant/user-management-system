@@ -364,38 +364,57 @@ exports.getCartItems = async (req, res) => {
   }
 };
 
-// exports.deleteCart = async (req, res) => {
-//   try {
-//     const userId = req.decodedId;
-//     const { cartId } = req.params; // Access cartId correctly
+exports.deleteCart = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const cartId = req.params; // Access cartId correctly
 
-//     console.log('delete');
+    console.log('delete');
 
-//     const user = await userModel.findById(userId);
-//     // const id = user.cart[0]._id; // Access the _id property of the cart
-//     // console.log('id', id);
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
 
-//     // Correct syntax for deleteOne method
-//     const data = await userModel.deleteOne({ user.cart[0]._id: cartId }); // Use _id instead of id
-//     console.log('datas', data);
+    const { _id } = user.cart[0];
+    console.log('id', _id);
 
-//     if (data) {
-//       return res.status(200).json({
-//         status: true,
-//         message: 'Deleted',
-//       });
-//     }
-//     return res.status(404).json({
-//       status: false,
-//       message: 'Cart not found',
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: 'Internal Server Error',
-//     });
-//   }
-// };
+    // if (_id === cartId) {
+    const data = await userModel.updateOne(
+      {},
+      {
+        $pull: {
+          cart: {
+            _id: new ObjectId(cartId),
+          },
+        },
+      },
+      {
+        multi: true,
+      },
+    );
+    if (data) {
+      return res.status(200).json({
+        status: true,
+        message: 'Deleted',
+      });
+    }
+    return res.status(404).json({
+      status: false,
+      message: 'User not found',
+    });
+    // }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
 
 exports.addToWishlist = async (req, res) => {
   try {
