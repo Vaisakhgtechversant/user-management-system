@@ -402,7 +402,7 @@ exports.deleteCart = async (req, res) => {
 
     // if (_id === cartId) {
     const data = await userModel.updateOne(
-      {},
+      { _id: userId },
       {
         $pull: {
           cart: {
