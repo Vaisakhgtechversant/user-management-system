@@ -19,7 +19,7 @@ module.exports = Joi.object({
   productCode: Joi.string()
     .pattern(/^[a-zA-Z0-9 -]+$/).message('only allow charaters, hyphens and letters')
     .min(1),
-  quantity: Joi.string()
+  stock: Joi.string()
     .pattern(/^[0-9 ]+$/).message('only allow numbers')
     .min(1),
   imageURL: Joi.string(),
