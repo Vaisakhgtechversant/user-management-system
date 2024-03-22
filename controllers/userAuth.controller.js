@@ -444,25 +444,36 @@ exports.addToWishlist = async (req, res) => {
       });
     }
     const product = await productModel.findById(productId);
+    console.log(productId);
     if (!product) {
       return res.status(404).json({
         status: false,
         message: 'Product not found',
       });
     }
-    if (user.wishlist.includes(productId)) {
+    const existingCartItem = user.wishlist.find((data) => data.product.toString() === productId);
+    if (existingCartItem) {
       return res.status(400).json({
         status: false,
         message: 'Product already exists in the wishlist',
       });
     }
-    user.wishlist.push(productId);
+    user.wishlist.push({
+      product: productId,
+      productName: product.productName,
+      productPrice: product.productPrice,
+      productDetails: product.productDetails,
+      category: product.category,
+      availability: product.availability,
+      productCode: product.productCode,
+    });
     await user.save();
     return res.status(200).json({
       status: true,
       message: 'Product added to wishlist successfully',
     });
   } catch (error) {
+    console.log(error);
     return handleError(res);
   }
 };
@@ -503,26 +514,27 @@ exports.deleteWishlist = async (req, res) => {
     const wishlistId = req.params; // Access cartId correctly
 
     const user = await userModel.findById(userId);
-    console.log(user.wishlist);
+    // console.log(user);
     if (!user) {
       return res.status(404).json({
         status: false,
         message: 'wishlist not found',
       });
     }
-    const { _id } = user.wishlist[0];
-    console.log('id', _id);
     const data = await userModel.updateOne(
-      {},
+      { _id: userId },
       {
         $pull: {
-          wishlist: new ObjectId(wishlistId),
+          wishlist: {
+            _id: new ObjectId(wishlistId),
+          },
         },
       },
       {
         multi: true,
       },
     );
+    // console.log('data', data)
     if (data) {
       return res.status(200).json({
         status: true,
@@ -535,6 +547,7 @@ exports.deleteWishlist = async (req, res) => {
     });
     // }
   } catch (error) {
+    // console.log(error);
     return handleError(res);
   }
 };
