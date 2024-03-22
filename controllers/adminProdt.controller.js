@@ -105,6 +105,7 @@ exports.updateProduct = async (req, res) => {
   try {
     const userId = req.params.id;
     const updateUser = req.body;
+    console.log(updateUser);
     const { error } = productSchema.validate(updateUser);
     if (error) {
       const errorMessage = error.details[0].message.replace(/['"]+/g, '');
@@ -113,7 +114,15 @@ exports.updateProduct = async (req, res) => {
         message: errorMessage,
       });
     }
-    const result = await productModel.updateOne({ _id: userId }, { $set: updateUser });
+    let imageBuffer = null;
+    if (req.file) {
+      imageBuffer = req.file.buffer;
+    }
+    const updateData = { ...updateUser };
+    if (imageBuffer) {
+      updateData.image = imageBuffer;
+    }
+    const result = await productModel.updateOne({ _id: userId }, { $set: updateData });
     if (result) {
       return res.status(200).json({
         status: true,

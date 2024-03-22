@@ -299,18 +299,24 @@ exports.addToCart = async (req, res) => {
         message: 'User not found',
       });
     }
-    const product = await productModel.findById(productId);
-    if (!product) {
+    const singleProduct = await productModel.findById(productId).populate('productDetails');
+    console.log('singleProduct', singleProduct);
+    if (!singleProduct) {
       return res.status(404).json({
         status: false,
         message: 'Product not found',
       });
     }
     const existingCartItem = user.cart.find((item) => item.product.toString() === productId);
+    // console.log(existingCartItem);
     if (existingCartItem) {
       existingCartItem.quantity += 1;
     } else {
-      user.cart.push({ product: productId, quantity: 1 });
+      user.cart.push(
+        {
+          product: singleProduct, productDetails: singleProduct.productDetails, quantity: 1,
+        },
+      );
     }
     await user.save();
     return res.status(200).json({
@@ -335,26 +341,50 @@ exports.getCartItems = async (req, res) => {
         message: 'User not found',
       });
     }
+    // const { page, limit } = req.query;
+    // const query = {};
+    // const currentPage = parseInt(page, 10) || 1;
+    // const limitNumber = parseInt(limit, 10) || 10;
+    // const startIndex = (currentPage - 1) * limitNumber;
+    const pipeline = [
+      {
+        $match: {
+          _id: new ObjectId(userId),
+        },
+      },
+      // { $skip: startIndex },
+      // { $limit: limitNumber },
+      {
+        $project: {
+          _id: 1,
+          productName: 1, // corrected from PRoductName to productName
+          productPrice: 1,
+          productDetails: 1,
+          category: 1,
+          availability: 1,
+          productCode: 1,
+          quantity: 1,
+        },
+      },
+    ];
+    const value = await productModel.aggregate(pipeline);
+    console.log(value);
 
-    // Access the cart items of the user
-    const { page, limit } = req.query;
-    const currentPage = parseInt(page, 10) || 1;
-    const limitNumber = parseInt(limit, 10) || 10;
-    const startIndex = (currentPage - 1) * limitNumber;
-
-    // Paginate the cart items
-    const cartItemCount = user.cart.length;
-    const paginatedCartItems = user.cart.slice(startIndex, startIndex + limitNumber);
-
+    // const [totalCount, paginatedData] = await Promise.all([
+    // userModel.countDocuments(query), // corrected from countDocument to countDocuments
+    // userModel.aggregate(pipeline).exec(),
+    // ]);
     return res.status(200).json({
       status: true,
       message: 'Cart items retrieved successfully',
-      currentPage,
-      limit: limitNumber,
-      totalCount: cartItemCount,
-      cartItems: paginatedCartItems,
+      result: value,
+      // currentPage,
+      // limit: limitNumber,
+      // totalCount,
+      // paginatedData,
     });
   } catch (error) {
+    console.log(error);
     return handleError(res);
   }
 };
@@ -451,7 +481,7 @@ exports.getWishlist = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         status: false,
-        message: 'User not found',
+        message: 'data not found',
       });
     }
     const { page, limit } = req.query;
