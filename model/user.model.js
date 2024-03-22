@@ -41,9 +41,27 @@ const userModel = mongoose.Schema({
       ref: 'producttable', // Reference to the Product model
       required: true,
     },
+    productName: {
+      type: String,
+    },
+    productPrice: {
+      type: String,
+    },
+    productDetails: {
+      type: String,
+    },
+    category: {
+      type: String,
+    },
     quantity: {
       type: Number,
-      default: 1, // Default quantity is 1
+      default: 1,
+    },
+    availability: {
+      type: String,
+    },
+    productCode: {
+      type: Number,
     },
   }],
   wishlist: [{
