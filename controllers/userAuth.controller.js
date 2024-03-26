@@ -11,6 +11,7 @@ const userUpdateSchema = require('../schemas/userupdate.schema');
 const updatePassword = require('../schemas/updatePassword.schema');
 const { handleError } = require('../utils/serverError');
 const productModel = require('../model/products.model');
+const orderModel = require('../model/order.model');
 
 dotenv.config();
 const { envtoken } = process.env;
@@ -316,25 +317,29 @@ exports.addToCart = async (req, res) => {
         message: 'Product not found',
       });
     }
+    let imageBuffer = null;
+    if (req.file) {
+      imageBuffer = req.file.buffer;
+    }
 
     const existingCartItem = user.cart.find((item) => item.product.toString() === productId);
     if (existingCartItem) {
       existingCartItem.quantity += 1;
-    } else {
-      user.cart.push(
-        {
-          product: productId,
-          productName: product.productName,
-          productPrice: product.productPrice,
-          productDetails: product.productDetails,
-          category: product.category,
-          availability: product.availability,
-          productCode: product.productCode,
-          quantity: 1,
-        },
-      );
+    }
+    const cartItem = {
+      productName: product.productName,
+      productPrice: product.productPrice,
+      productDetails: product.productDetails,
+      category: product.category,
+      availability: product.availability,
+      productCode: product.productCode,
+      image: product.image,
+    };
+    if (imageBuffer) {
+      cartItem.image = imageBuffer;
     }
 
+    user.cart.push(cartItem);
     await user.save();
     return res.status(200).json({
       status: true,
@@ -393,7 +398,7 @@ exports.deleteCart = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         status: false,
-        message: 'cart not found',
+        message: 'user not found',
       });
     }
 
@@ -424,6 +429,7 @@ exports.deleteCart = async (req, res) => {
       status: false,
       message: 'cart not found',
     });
+
     // }
   } catch (error) {
     console.log(error);
@@ -451,6 +457,10 @@ exports.addToWishlist = async (req, res) => {
         message: 'Product not found',
       });
     }
+    let imageBuffer = null;
+    if (req.file) {
+      imageBuffer = req.file.buffer;
+    }
     const existingCartItem = user.wishlist.find((data) => data.product.toString() === productId);
     if (existingCartItem) {
       return res.status(400).json({
@@ -458,15 +468,20 @@ exports.addToWishlist = async (req, res) => {
         message: 'Product already exists in the wishlist',
       });
     }
-    user.wishlist.push({
-      product: productId,
+    const wishlistItem = {
       productName: product.productName,
       productPrice: product.productPrice,
       productDetails: product.productDetails,
       category: product.category,
       availability: product.availability,
       productCode: product.productCode,
-    });
+      image: product.image,
+    };
+    if (imageBuffer) {
+      wishlistItem.image = imageBuffer;
+    }
+
+    user.wishlist.push(wishlistItem);
     await user.save();
     return res.status(200).json({
       status: true,
@@ -548,6 +563,48 @@ exports.deleteWishlist = async (req, res) => {
     // }
   } catch (error) {
     // console.log(error);
+    return handleError(res);
+  }
+};
+
+exports.orderProduct = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const { productId } = req.params;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+    }
+    const newOrder = orderModel.push(
+      {
+        product: productId,
+        productName: product.productName,
+        productPrice: product.productPrice,
+        productDetails: product.productDetails,
+        category: product.category,
+        availability: product.availability,
+        productCode: product.productCode,
+        quantity: 1,
+      },
+    );
+    await newOrder.save();
+    return res.status(200).json({
+      status: true,
+      message: 'order successfully',
+    });
+  } catch (error) {
     return handleError(res);
   }
 };
