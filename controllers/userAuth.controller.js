@@ -317,29 +317,25 @@ exports.addToCart = async (req, res) => {
         message: 'Product not found',
       });
     }
-    let imageBuffer = null;
-    if (req.file) {
-      imageBuffer = req.file.buffer;
-    }
-
-    const existingCartItem = user.cart.find((item) => item.product.toString() === productId);
+    const existingCartItem = user.cart.find((item) => item.id.toString() === productId);
+    console.log(existingCartItem);
     if (existingCartItem) {
       existingCartItem.quantity += 1;
-    }
-    const cartItem = {
-      productName: product.productName,
-      productPrice: product.productPrice,
-      productDetails: product.productDetails,
-      category: product.category,
-      availability: product.availability,
-      productCode: product.productCode,
-      image: product.image,
-    };
-    if (imageBuffer) {
-      cartItem.image = imageBuffer;
+    } else {
+      user.cart.push(
+        {
+          product: product.productId,
+          productName: product.productName,
+          productPrice: product.productPrice,
+          productDetails: product.productDetails,
+          category: product.category,
+          availability: product.availability,
+          productCode: product.productCode,
+          quantity: 1,
+        },
+      );
     }
 
-    user.cart.push(cartItem);
     await user.save();
     return res.status(200).json({
       status: true,
