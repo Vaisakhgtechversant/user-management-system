@@ -35,37 +35,6 @@ const userModel = mongoose.Schema({
     require: true,
     type: String,
   },
-  cart: [{
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'producttable', // Reference to the Product model
-    },
-    productName: {
-      type: String,
-    },
-    productPrice: {
-      type: String,
-    },
-    productDetails: {
-      type: String,
-    },
-    category: {
-      type: String,
-    },
-    quantity: {
-      type: Number,
-      default: 1,
-    },
-    availability: {
-      type: String,
-    },
-    productCode: {
-      type: Number,
-    },
-    image: {
-      type: Buffer,
-    },
-  }],
   wishlist: [{
     product: {
       type: mongoose.Schema.Types.ObjectId,

@@ -12,6 +12,8 @@ const updatePassword = require('../schemas/updatePassword.schema');
 const { handleError } = require('../utils/serverError');
 const productModel = require('../model/products.model');
 const orderModel = require('../model/order.model');
+const CartItem = require('../model/cart.model');
+const WishlistItem = require('../model/wishlist.model');
 
 dotenv.config();
 const { envtoken } = process.env;
@@ -317,26 +319,29 @@ exports.addToCart = async (req, res) => {
         message: 'Product not found',
       });
     }
-    const existingCartItem = user.cart.find((item) => item.id.toString() === productId);
-    console.log(existingCartItem);
-    if (existingCartItem) {
-      existingCartItem.quantity += 1;
+
+    let cartItem = await CartItem.findOne({ productId });
+    console.log('cartItem', cartItem);
+    let imageBuffer = null;
+    if (req.file) {
+      imageBuffer = req.file.buffer;
+    }
+    if (cartItem) {
+      cartItem.quantity += 1;
     } else {
-      user.cart.push(
-        {
-          product: product.productId,
-          productName: product.productName,
-          productPrice: product.productPrice,
-          productDetails: product.productDetails,
-          category: product.category,
-          availability: product.availability,
-          productCode: product.productCode,
-          quantity: 1,
-        },
-      );
+      cartItem = new CartItem({
+        userId,
+        productId,
+        role: 'user',
+        quantity: 1, // Assuming you have a role for cart items
+      });
+    }
+    if (imageBuffer) {
+      cartItem.image = imageBuffer;
     }
 
-    await user.save();
+    await cartItem.save();
+
     return res.status(200).json({
       status: true,
       message: 'Product added to cart successfully',
@@ -386,7 +391,7 @@ exports.getCartItems = async (req, res) => {
 exports.deleteCart = async (req, res) => {
   try {
     const userId = req.decodedId;
-    const cartId = req.params; // Access cartId correctly
+    const { cartId } = req.params; // Access cartId correctly
 
     console.log('delete');
 
@@ -397,25 +402,9 @@ exports.deleteCart = async (req, res) => {
         message: 'user not found',
       });
     }
-
-    const { _id } = user.cart[0];
-    console.log('id', _id);
-
-    // if (_id === cartId) {
-    const data = await userModel.updateOne(
-      { _id: userId },
-      {
-        $pull: {
-          cart: {
-            _id: new ObjectId(cartId),
-          },
-        },
-      },
-      {
-        multi: true,
-      },
-    );
-    if (data) {
+    const result = await CartItem.deleteOne({ _id: cartId }); // Use _id to match cartId
+    console.log(result);
+    if (result) { // Check if any document was deleted
       return res.status(200).json({
         status: true,
         message: 'cart deleted',
@@ -425,8 +414,6 @@ exports.deleteCart = async (req, res) => {
       status: false,
       message: 'cart not found',
     });
-
-    // }
   } catch (error) {
     console.log(error);
     return handleError(res);
@@ -453,31 +440,37 @@ exports.addToWishlist = async (req, res) => {
         message: 'Product not found',
       });
     }
-    let imageBuffer = null;
-    if (req.file) {
-      imageBuffer = req.file.buffer;
-    }
-    const existingCartItem = user.wishlist.find((data) => data.product.toString() === productId);
-    if (existingCartItem) {
+    let wishlistItem = await WishlistItem.findOne({ productId });
+    if (wishlistItem) {
       return res.status(400).json({
         status: false,
         message: 'Product already exists in the wishlist',
       });
     }
-    const wishlistItem = {
+    let imageBuffer = null;
+    if (req.file) {
+      imageBuffer = req.file.buffer;
+    }
+    wishlistItem = new WishlistItem({
+      userId,
+      productId,
       productName: product.productName,
       productPrice: product.productPrice,
       productDetails: product.productDetails,
       category: product.category,
       availability: product.availability,
       productCode: product.productCode,
+      stock: product.stock,
       image: product.image,
-    };
+      role: 'user',
+      quantity: 1, // Assuming you have a role for cart items
+    });
+
     if (imageBuffer) {
       wishlistItem.image = imageBuffer;
     }
 
-    user.wishlist.push(wishlistItem);
+    wishlistItem.save();
     await user.save();
     return res.status(200).json({
       status: true,
