@@ -316,14 +316,14 @@ exports.addToCart = async (req, res) => {
         message: 'Product not found',
       });
     }
-
-    const existingCartItem = user.cart.find((item) => item.product.toString() === productId);
+    const existingCartItem = user.cart.find((item) => item.id.toString() === productId);
+    console.log(existingCartItem);
     if (existingCartItem) {
       existingCartItem.quantity += 1;
     } else {
       user.cart.push(
         {
-          product: productId,
+          product: product.productId,
           productName: product.productName,
           productPrice: product.productPrice,
           productDetails: product.productDetails,
@@ -459,7 +459,7 @@ exports.addToWishlist = async (req, res) => {
       });
     }
     user.wishlist.push({
-      product: productId,
+      product: product.productId,
       productName: product.productName,
       productPrice: product.productPrice,
       productDetails: product.productDetails,

@@ -39,7 +39,6 @@ const userModel = mongoose.Schema({
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'producttable', // Reference to the Product model
-      required: true,
     },
     productName: {
       type: String,
@@ -68,7 +67,6 @@ const userModel = mongoose.Schema({
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'producttable', // Reference to the Product model
-      required: true,
     },
     productName: {
       type: String,
