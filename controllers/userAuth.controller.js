@@ -295,15 +295,12 @@ exports.addToCart = async (req, res) => {
   try {
     const userId = req.decodedId;
     const { productId } = req.params;
-
-    // Check if productId is provided
     if (!productId) {
       return res.status(400).json({
         status: false,
         message: 'Product ID is missing in request parameters',
       });
     }
-
     const user = await userModel.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -311,7 +308,6 @@ exports.addToCart = async (req, res) => {
         message: 'User not found',
       });
     }
-
     const product = await productModel.findById(productId);
     if (!product) {
       return res.status(404).json({
@@ -319,29 +315,33 @@ exports.addToCart = async (req, res) => {
         message: 'Product not found',
       });
     }
-
-    let cartItem = await CartItem.findOne({ productId });
-    console.log('cartItem', cartItem);
-    let imageBuffer = null;
-    if (req.file) {
-      imageBuffer = req.file.buffer;
-    }
-    if (cartItem) {
-      cartItem.quantity += 1;
-    } else {
+    let cartItem = await CartItem.findOne({ userId });
+    if (!cartItem) {
+      // If cartItem not found, create a new cartItem
       cartItem = new CartItem({
         userId,
-        productId,
-        role: 'user',
-        quantity: 1, // Assuming you have a role for cart items
+        products: [],
       });
     }
-    if (imageBuffer) {
-      cartItem.image = imageBuffer;
+    if (!cartItem.products) {
+      cartItem.products = [];
     }
-
+    const existingProductIndex = cartItem.products.findIndex((item) => {
+      if (item.productId && item.productId.toString() === productId) {
+        return true;
+      }
+      return false;
+    });
+    if (existingProductIndex !== -1) {
+      cartItem.products[existingProductIndex].quantity += 1;
+    } else {
+      cartItem.products.push({
+        productId: product._id,
+        productName: product.productName,
+        quantity: 1,
+      });
+    }
     await cartItem.save();
-
     return res.status(200).json({
       status: true,
       message: 'Product added to cart successfully',
@@ -354,10 +354,81 @@ exports.addToCart = async (req, res) => {
     });
   }
 };
+// exports.getCartItems = async (req, res) => {
+//   try {
+//     const userId = req.decodedId;
+//     const user = await userModel.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({
+//         status: false,
+//         message: 'User not found',
+//       });
+//     }
+
+//     // Ensure that the user object contains a cart property
+//     if (!user.cart) {
+//       return res.status(200).json({
+//         status: true,
+//         message: 'No cart items found',
+//         currentPage: 1,
+//         limit: 10,
+//         totalCount: 0,
+//         cartItems: [],
+//       });
+//     }
+
+//     // Access the cart items of the user
+//     const { page, limit } = req.query;
+//     const currentPage = parseInt(page, 10) || 1;
+//     const limitNumber = parseInt(limit, 10) || 10;
+//     const startIndex = (currentPage - 1) * limitNumber;
+
+//     // Paginate the cart items
+//     const cartItemCount = user.cart.length;
+//     const paginatedCartItems = user.cart.slice(startIndex, startIndex + limitNumber);
+//     console.log(paginatedCartItems);
+
+//     return res.status(200).json({
+//       status: true,
+//       message: 'Cart items retrieved successfully',
+//       currentPage,
+//       limit: limitNumber,
+//       totalCount: cartItemCount,
+//       cartItems: paginatedCartItems,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     return handleError(res);
+//   }
+// };
 
 exports.getCartItems = async (req, res) => {
   try {
     const userId = req.decodedId;
+    const data = await CartItem.findOne({ userId });
+    console.log('data', data);
+    if (data) {
+      return res.status(200).json({
+        status: true,
+        message: 'user retrieved successfully',
+        result: data,
+      });
+    }
+    return res.status(404).json({
+      status: false,
+      message: 'user not found',
+    });
+  } catch (error) {
+    console.log('hi');
+    return handleError(res);
+  }
+};
+
+exports.deleteCart = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const { cartId } = req.params;
+
     const user = await userModel.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -365,54 +436,39 @@ exports.getCartItems = async (req, res) => {
         message: 'User not found',
       });
     }
-
-    // Access the cart items of the user
-    const { page, limit } = req.query;
-    const currentPage = parseInt(page, 10) || 1;
-    const limitNumber = parseInt(limit, 10) || 10;
-    const startIndex = (currentPage - 1) * limitNumber;
-
-    // Paginate the cart items
-    const cartItemCount = user.cart.length;
-    const paginatedCartItems = user.cart.slice(startIndex, startIndex + limitNumber);
-
-    return res.status(200).json({
-      status: true,
-      message: 'Cart items retrieved successfully',
-      currentPage,
-      limit: limitNumber,
-      totalCount: cartItemCount,
-      cartItems: paginatedCartItems,
-    });
-  } catch (error) {
-    return handleError(res);
-  }
-};
-exports.deleteCart = async (req, res) => {
-  try {
-    const userId = req.decodedId;
-    const { cartId } = req.params; // Access cartId correctly
-
-    console.log('delete');
-
-    const user = await userModel.findById(userId);
-    if (!user) {
+    const cartItem = await CartItem.findOne({ userId });
+    console.log(cartItem);
+    if (!cartItem) {
       return res.status(404).json({
         status: false,
-        message: 'user not found',
+        message: 'Cart not found',
       });
     }
-    const result = await CartItem.deleteOne({ _id: cartId }); // Use _id to match cartId
-    console.log(result);
-    if (result) { // Check if any document was deleted
+    const data = await CartItem.updateOne(
+      { userId },
+      {
+        $pull: {
+          products: {
+            _id: new ObjectId(cartId),
+          },
+        },
+      },
+      {
+        multi: true,
+      },
+    );
+    // console.log(data);
+
+    if (data) {
       return res.status(200).json({
         status: true,
-        message: 'cart deleted',
+        message: 'Cart item deleted',
       });
     }
+
     return res.status(404).json({
       status: false,
-      message: 'cart not found',
+      message: 'Cart item not found',
     });
   } catch (error) {
     console.log(error);
@@ -432,46 +488,41 @@ exports.addToWishlist = async (req, res) => {
         message: 'User not found',
       });
     }
+
     const product = await productModel.findById(productId);
-    console.log(productId);
     if (!product) {
       return res.status(404).json({
         status: false,
         message: 'Product not found',
       });
     }
-    let wishlistItem = await WishlistItem.findOne({ productId });
-    if (wishlistItem) {
+
+    let wishlistItem = await WishlistItem.findOne({ userId });
+
+    // If wishlistItem doesn't exist, create a new one
+    if (!wishlistItem) {
+      wishlistItem = new WishlistItem({
+        userId,
+        products: [],
+      });
+    }
+
+    const existingItem = wishlistItem.products.findIndex((item) => item
+      .productId && item.productId.toString() === productId);
+    if (existingItem !== -1) {
       return res.status(400).json({
         status: false,
         message: 'Product already exists in the wishlist',
       });
     }
-    let imageBuffer = null;
-    if (req.file) {
-      imageBuffer = req.file.buffer;
-    }
-    wishlistItem = new WishlistItem({
-      userId,
-      productId,
+
+    wishlistItem.products.push({
+      productId: product._id,
       productName: product.productName,
-      productPrice: product.productPrice,
-      productDetails: product.productDetails,
-      category: product.category,
-      availability: product.availability,
-      productCode: product.productCode,
-      stock: product.stock,
-      image: product.image,
-      role: 'user',
-      quantity: 1, // Assuming you have a role for cart items
     });
 
-    if (imageBuffer) {
-      wishlistItem.image = imageBuffer;
-    }
+    await wishlistItem.save();
 
-    wishlistItem.save();
-    await user.save();
     return res.status(200).json({
       status: true,
       message: 'Product added to wishlist successfully',
