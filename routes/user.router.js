@@ -1,6 +1,6 @@
 const express = require('express');
 const loginController = require('../controllers/login.controller');
-// const orderController = require('../controllers/order.controller');
+const orderController = require('../controllers/order.controller');
 const userAuthController = require('../controllers/userAuth.controller');
 const { verifyUserRole } = require('../middleware/authGuard.middleware');
 const { verifyUser } = require('../middleware/user.middleware');
@@ -24,7 +24,7 @@ router.get('/cart', verifyUser, userAuthController.getCartItems);
 router.get('/wishlist', verifyUser, userAuthController.getWishlist);
 router.delete('/delete-cart/:id', verifyUser, userAuthController.deleteCart);
 router.delete('/delete-wishist/:id', verifyUser, userAuthController.deleteWishlist);
-// router.post('/order', verifyUser, orderController.orderProduct);
-// router.get('/get', verifyUser, orderController.get_order);
+router.post('/order', verifyUser, orderController.orderProduct);
+router.get('/get', verifyUser, orderController.get_order);
 
 module.exports = router;

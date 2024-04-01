@@ -317,10 +317,11 @@ exports.addToCart = async (req, res) => {
     }
     let cartItem = await CartItem.findOne({ userId });
     if (!cartItem) {
-      cartItem = new Cart({ userId, products: [] });
+      cartItem = new CartItem({ userId, products: [] });
     }
 
-    const existingProduct = cartItem.products.find((item) => item.productId.toString() === productId);
+    const existingProduct = cartItem.products.find((item) => item
+      .productId.toString() === productId);
     console.log(existingProduct);
     if (existingProduct) {
       existingProduct.quantity += 1;
@@ -361,7 +362,7 @@ exports.getCartItems = async (req, res) => {
       [
         {
           $match: {
-            userId: new ObjectId('65fd6194d6e851a95bb86536'),
+            userId: new ObjectId(userId),
           },
         },
         {
@@ -374,11 +375,32 @@ exports.getCartItems = async (req, res) => {
         },
       ],
     );
-    console.log(aggregateData);
+    const cartQuantities = await CartItem.aggregate([
+      {
+        $match: {
+          userId: new ObjectId(userId),
+        },
+      },
+      {
+        $unwind: {
+          path: '$products',
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalQuantity: { $sum: '$products.quantity' },
+        },
+      },
+    ]);
+
+    console.log(cartQuantities);
+
     return res.status(200).json({
       status: true,
       message: 'Cart items retrieved successfully',
-      result: aggregateData,
+      cartItems: aggregateData,
+      cartQuantities: cartQuantities.length > 0 ? cartQuantities[0].totalQuantity : 0,
     });
   } catch (error) {
     console.log(error);

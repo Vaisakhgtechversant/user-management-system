@@ -39,6 +39,7 @@ exports.addProduct = async (req, res) => {
       message: 'product added successful',
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: false,
       message: 'internal server error',

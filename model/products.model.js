@@ -17,7 +17,7 @@ const productModel = mongoose.Schema({
     require: true,
     type: String,
   },
-  categories: {
+  category: {
     require: true,
     type: String,
   },

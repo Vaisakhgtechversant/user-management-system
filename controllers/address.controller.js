@@ -1,6 +1,7 @@
 const userModel = require('../model/user.model');
 const addressSchema = require('../schemas/addressSchema');
-const addressModel = require('../model/address.model');
+const AddressModel = require('../model/address.model');
+const { handleError } = require('../utils/serverError');
 
 exports.add_address = async (req, res) => {
   try {
@@ -20,12 +21,32 @@ exports.add_address = async (req, res) => {
         message: 'User not found',
       });
     }
-    const addressData = await addressModel.findOne({ userId });
+    let addressData = await AddressModel.findOne({ userId });
     console.log(addressData);
     if (!addressData) {
-          addressData = new addressModel({ userId, address: [] });
+      addressData = new AddressModel({ userId, address: [] });
     }
+    const {
+      fullName, phoneNumber, alternateNumber,
+      pincode, state, city, buildingName, area, landmark,
+    } = req.body;
+    addressData.address.push({
+      fullName,
+      phoneNumber,
+      alternateNumber,
+      pincode,
+      state,
+      city,
+      buildingName,
+      area,
+      landmark,
+    });
+    await addressData.save();
+    return res.status(200).json({
+      status: true,
+      message: 'address added successfully',
+    });
   } catch (error) {
-
+    return handleError(res);
   }
 };

@@ -20,7 +20,7 @@ const addressModel = mongoose.Schema({
       require: true,
       type: Number,
     },
-    alternatePhNumber: {
+    alternateNumber: {
       require: true,
       type: Number,
     },

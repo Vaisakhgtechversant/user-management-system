@@ -25,10 +25,13 @@ const orderModel = mongoose.Schema({
   amount: {
     type: Number,
   },
-  address: {
-    type: Object,
-    required: true,
+  address: [{
+    addressId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'addresstable',
+    },
   },
+  ],
   status: {
     type: String,
     default: 'pending',
