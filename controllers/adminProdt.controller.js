@@ -15,14 +15,14 @@ exports.addProduct = async (req, res) => {
     const imageBuffers = images.map((image) => image.buffer);
     const {
       title, description,
-      categories, size, color, availability,
+      category, size, color, availability,
       stock, price, offer,
     } = req.body;
     const discountedPrice = price - (price * (offer / 100));
     const productData = {
       title,
       description,
-      categories,
+      category,
       size,
       color,
       availability,

@@ -10,7 +10,7 @@ module.exports = Joi.object({
   description: Joi.string()
     .pattern(/^[a-zA-Z0-9, -.]+$/).message('product details only allow characters, numbers, commas, hyphens, dots and spaces')
     .min(1),
-  categories: Joi.string()
+  category: Joi.string()
     .pattern(/^[a-zA-Z0-9, -]+$/).message('category only allow charaters numbers and hyphens')
     .min(1),
   availability: Joi.string()
