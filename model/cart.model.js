@@ -13,27 +13,7 @@ const cartModel = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'producttable',
     },
-    productName: {
-      require: true,
-      type: String,
-    },
-    productPrice: {
-      require: true,
-      type: String,
-    },
-    productDetails: {
-      require: true,
-      type: String,
-    },
-    category: {
-      require: true,
-      type: String,
-    },
-    availability: {
-      require: true,
-      type: String,
-    },
-    productCode: {
+    title: {
       require: true,
       type: String,
     },
@@ -41,14 +21,6 @@ const cartModel = mongoose.Schema({
       type: Number,
       default: 1,
     },
-    stock: {
-      require: true,
-      type: String,
-    },
-    image: {
-      type: Buffer,
-    },
-  },
-  ],
+  }],
 });
 module.exports = mongoose.model('carttable', cartModel);

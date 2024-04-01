@@ -9,44 +9,46 @@ const productModel = mongoose.Schema({
     type: String,
   },
 
-  productName: {
+  title: {
     require: true,
     type: String,
   },
-  productPrice: {
+  description: {
     require: true,
     type: String,
   },
-  productDetails: {
+  categories: {
     require: true,
     type: String,
   },
-  category: {
-    require: true,
+  size: {
+    type: String,
+  },
+  color: {
     type: String,
   },
   availability: {
     require: true,
     type: String,
   },
-  productCode: {
-    require: true,
-    type: String,
-  },
-  quantity: {
-    require: false,
-    type: String,
-  },
   stock: {
     require: true,
-    type: String,
+    type: Number,
   },
-  image: {
+  image: [{
     type: Buffer,
+  }],
+  price: {
+    type: Number,
+    required: true,
   },
-  role: {
-    require: true,
-    type: String,
+  offer: {
+    type: Number,
+    min: 0,
+    max: 100,
+  },
+  discountedPrice: {
+    type: Number,
   },
 
 });

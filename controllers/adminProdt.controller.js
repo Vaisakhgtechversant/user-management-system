@@ -11,27 +11,29 @@ exports.addProduct = async (req, res) => {
         message: errorMessage,
       });
     }
-    let imageBuffer = null;
-    if (req.file) {
-      imageBuffer = req.file.buffer;
-    }
+    const images = req.files; // req.files contains an array of uploaded files
+    const imageBuffers = images.map((image) => image.buffer);
     const {
-      productName, productPrice, productDetails,
-      category, availability, productCode, stock,
+      title, description,
+      categories, size, color, availability,
+      stock, price, offer,
     } = req.body;
+    const discountedPrice = price - (price * (offer / 100));
     const productData = {
-      productName,
-      productPrice,
-      productDetails,
-      category,
+      title,
+      description,
+      categories,
+      size,
+      color,
       availability,
-      productCode,
       stock,
+      price,
+      offer,
+      discountedPrice,
+      image: imageBuffers,
     };
-    if (imageBuffer) {
-      productData.image = imageBuffer;
-    }
     await productModel.create(productData);
+    console.log(productData);
     return res.status(201).json({
       status: 'true',
       message: 'product added successful',
@@ -114,15 +116,18 @@ exports.updateProduct = async (req, res) => {
         message: errorMessage,
       });
     }
-    let imageBuffer = null;
-    if (req.file) {
-      imageBuffer = req.file.buffer;
-    }
+    const images = req.files;
+    const imageBuffers = images.map((image) => image.buffer);
     const updateData = { ...updateUser };
-    if (imageBuffer) {
-      updateData.image = imageBuffer;
+    if ('price' in updateUser || 'offer' in updateUser) {
+      const { price, offer } = updateUser;
+      updateData.discountedPrice = price - (price * (offer / 100));
+    }
+    if (imageBuffers) {
+      updateData.image = imageBuffers;
     }
     const result = await productModel.updateOne({ _id: userId }, { $set: updateData });
+    console.log(result);
     if (result) {
       return res.status(200).json({
         status: true,

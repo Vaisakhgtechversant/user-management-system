@@ -35,32 +35,5 @@ const userModel = mongoose.Schema({
     require: true,
     type: String,
   },
-  wishlist: [{
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'producttable', // Reference to the Product model
-    },
-    productName: {
-      type: String,
-    },
-    productPrice: {
-      type: String,
-    },
-    productDetails: {
-      type: String,
-    },
-    category: {
-      type: String,
-    },
-    availability: {
-      type: String,
-    },
-    productCode: {
-      type: Number,
-    },
-    image: {
-      type: Buffer,
-    },
-  }],
 });
 module.exports = mongoose.model('usertable', userModel);

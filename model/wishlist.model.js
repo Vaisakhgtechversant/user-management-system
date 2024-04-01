@@ -13,46 +13,16 @@ const wishlistModel = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'producttable',
     },
-    productName: {
+    title: {
       require: true,
       type: String,
-    },
-    productPrice: {
-      require: true,
-      type: String,
-    },
-    productDetails: {
-      require: true,
-      type: String,
-    },
-    category: {
-      require: true,
-      type: String,
-    },
-    availability: {
-      require: true,
-      type: String,
-    },
-    productCode: {
-      require: true,
-      type: String,
-    },
-    stock: {
-      require: true,
-      type: String,
-    },
-    image: {
-      type: Buffer,
     },
   },
   ],
-  id: {
-    require: true,
-    type: String,
+  isWishlisted: {
+    type: Boolean,
+    default: true,
   },
-  role: {
-    require: true,
-    type: String,
-  },
+
 });
 module.exports = mongoose.model('wishlisttable', wishlistModel);
