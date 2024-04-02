@@ -1,11 +1,14 @@
 const quantityModel = require('../model/quantity.model');
 const userModel = require('../model/user.model');
+const ProductModel = require('../model/products.model');
 const { handleError } = require('../utils/serverError');
 const quantitySchema = require('../schemas/quantitySchema');
 
 exports.add_qty = async (req, res) => {
   try {
     const userId = req.decodedId;
+    const productId = req.params;
+
     const { error } = quantitySchema.validate(req.body);
     if (error) {
       return res.status(400).send(error.details[0].message);
@@ -17,12 +20,23 @@ exports.add_qty = async (req, res) => {
         message: 'User not found',
       });
     }
-    const {
-      quantity,
-    } = req.body;
-    await quantityModel.create({
-      quantity,
-    });
+    const product = await ProductModel.findById(productId);
+    console.log('product', product);
+    if (!product) {
+      return res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+    }
+    let productItem = await ProductModel.findOne({ userId });
+    console.log('wishlistItem', ProductModel);
+    // If wishlistItem doesn't exist, create a new one
+    if (!productItem) {
+      productItem = new ProductModel({
+        userId,
+        quantity,
+      });
+    }
     return res.status(201).json({
       status: 'true',
       message: 'quantity changed',
