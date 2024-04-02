@@ -411,7 +411,7 @@ exports.getCartItems = async (req, res) => {
 exports.deleteCart = async (req, res) => {
   try {
     const userId = req.decodedId;
-    const cartId = req.params;
+    const productId = req.params;
 
     const user = await userModel.findById(userId);
     if (!user) {
@@ -433,7 +433,7 @@ exports.deleteCart = async (req, res) => {
       {
         $pull: {
           products: {
-            _id: new ObjectId(cartId),
+            productId: new ObjectId(productId),
           },
         },
       },
@@ -470,7 +470,7 @@ exports.addToWishlist = async (req, res) => {
       });
     }
     const product = await productModel.findById(productId);
-    console.log('product', product.title);
+    console.log('product', product);
     if (!product) {
       return res.status(404).json({
         status: false,
@@ -478,7 +478,7 @@ exports.addToWishlist = async (req, res) => {
       });
     }
     let wishlistItem = await WishlistItem.findOne({ userId });
-    console.log('wishlistItem', wishlistItem.products);
+    console.log('wishlistItem', wishlistItem);
     // If wishlistItem doesn't exist, create a new one
     if (!wishlistItem) {
       wishlistItem = new WishlistItem({
@@ -591,7 +591,7 @@ exports.getWishlist = async (req, res) => {
 exports.deleteWishlist = async (req, res) => {
   try {
     const userId = req.decodedId;
-    const wishlistId = req.params; // Access cartId correctly
+    const productId = req.params; // Access cartId correctly
 
     const user = await userModel.findById(userId);
     // console.log(user);
@@ -606,7 +606,7 @@ exports.deleteWishlist = async (req, res) => {
       {
         $pull: {
           products: {
-            _id: new ObjectId(wishlistId),
+            productId: new ObjectId(productId),
           },
         },
       },
