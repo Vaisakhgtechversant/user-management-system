@@ -25,6 +25,7 @@ exports.orderProduct = async (req, res) => {
       });
     }
     const cartItems = await cartModel.findOne({ userId });
+    console.log(cartItems);
     if (!cartItems || cartItems.products.length === 0) {
       return res.status(404).json({
         status: false,
@@ -61,7 +62,7 @@ exports.orderProduct = async (req, res) => {
 exports.get_order = async (req, res) => {
   try {
     const userId = req.decodedId;
-    const user = await userModel.findOne({ userId });
+    const user = await userModel.findById(userId);
     if (!user) {
       return res.status(404).json({
         status: false,

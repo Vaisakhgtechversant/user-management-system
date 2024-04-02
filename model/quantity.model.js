@@ -2,11 +2,15 @@ const mongoose = require('mongoose');
 
 mongoose.connect('mongodb+srv://vaisakhg:lEqDyxySDVok6TSI@ums-db.cvc11dl.mongodb.net/?retryWrites=true&w=majority');
 
-const orderModel = mongoose.Schema({
+const quantityModel = mongoose.Schema({
 
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'usertable',
+  },
+  quantity: {
+    type: Number,
+    default: 1,
   },
   products: [{
     productId: {
@@ -17,24 +21,6 @@ const orderModel = mongoose.Schema({
       require: true,
       type: String,
     },
-    quantity: {
-      type: Number,
-      default: 1,
-    },
   }],
-  amount: {
-    type: Number,
-  },
-  address: [{
-    addressId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'addresstable',
-    },
-  },
-  ],
-  status: {
-    type: String,
-    default: 'pending',
-  },
 });
-module.exports = mongoose.model('ordertable', orderModel);
+module.exports = mongoose.model('quantitytable', quantityModel);
