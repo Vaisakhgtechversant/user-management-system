@@ -382,14 +382,8 @@ exports.getCartItems = async (req, res) => {
         },
       },
       {
-        $unwind: {
-          path: '$products',
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalQuantity: { $sum: '$products.quantity' },
+        $project: {
+          quantity: 'quantity',
         },
       },
     ]);
@@ -546,41 +540,39 @@ exports.addToWishlist = async (req, res) => {
 exports.getWishlist = async (req, res) => {
   try {
     const userId = req.decodedId;
-    console.log(userId);
     const wishlistitem = await WishlistItem.findOne({ userId });
-    console.log('wishlistitem', wishlistitem);
+    let status = false;
+    let aggregateData;
     if (!wishlistitem) {
-      return res.status(404).json({
+      res.status(404).json({
         status: false,
         message: 'wishlist not found',
       });
+    } else {
+      status = true;
+      aggregateData = await WishlistItem.aggregate([
+        {
+          $match: { userId: new ObjectId(userId) },
+        },
+        {
+          $lookup: {
+            from: 'producttables',
+            localField: 'products.productId',
+            foreignField: '_id',
+            as: 'results',
+          },
+        },
+        {
+          $addFields: {
+            status: status.toString(),
+          },
+        },
+      ]);
     }
-
-    const aggregateData = await WishlistItem.aggregate([
-      {
-        $match: { userId: new ObjectId(userId) },
-      },
-      {
-        $lookup: {
-          from: 'producttables',
-          localField: 'products.productId',
-          foreignField: '_id',
-          as: 'results',
-        },
-      },
-      {
-        $addFields: {
-          status: 'true',
-        },
-      },
-    ]);
-
-    console.log(aggregateData);
-
     return res.status(200).json({
       status: true,
       message: 'wishlist items retrieved successfully',
-      result: aggregateData,
+      result: aggregateData, // Returning aggregateData outside the else block
     });
   } catch (error) {
     console.log(error);

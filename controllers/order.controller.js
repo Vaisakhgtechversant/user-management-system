@@ -1,6 +1,7 @@
 const OrderModel = require('../model/order.model');
 const userModel = require('../model/user.model');
 const cartModel = require('../model/cart.model');
+const addressModel = require('../model/address.model');
 
 // const productModel = require('../model/products.model');
 const { handleError } = require('../utils/serverError');
@@ -16,6 +17,13 @@ exports.orderProduct = async (req, res) => {
         message: 'User not found',
       });
     }
+    const address = await addressModel.findOne({ userId });
+    if (!address) {
+      return res.status(404).json({
+        status: false,
+        message: 'Address not found for the user',
+      });
+    }
     const cartItems = await cartModel.findOne({ userId });
     if (!cartItems || cartItems.products.length === 0) {
       return res.status(404).json({
@@ -23,7 +31,7 @@ exports.orderProduct = async (req, res) => {
         message: 'No products found in the cart',
       });
     }
-    const totalPrice = cartItems.products.reduce((acc, product) => {
+    const amount = cartItems.products.reduce((acc, product) => {
       if (product.price && product
         .quantity && !Number.isNaN(product.price) && !Number.isNaN(product.quantity)) {
         return acc + (parseFloat(product.price) * parseFloat(product.quantity));
@@ -35,8 +43,8 @@ exports.orderProduct = async (req, res) => {
     const order = new OrderModel({
       userId,
       products: cartItems.products,
-      address: req.body.address,
-      totalPrice,
+      address: address.address,
+      amount,
     });
 
     await order.save();
