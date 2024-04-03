@@ -21,6 +21,9 @@ const cartModel = mongoose.Schema({
       type: Number,
       default: 1,
     },
+    amount: {
+      type: Number,
+    },
   }],
 });
 module.exports = mongoose.model('carttable', cartModel);

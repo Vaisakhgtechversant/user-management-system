@@ -332,10 +332,18 @@ exports.addToCart = async (req, res) => {
         quantity: 1,
       });
     }
+    let totalAmount = 0;
+    cartItem.products.forEach((item) => {
+      totalAmount += item.quantity * product.price; // Assuming price is in the product model
+    });
+
+    // Assign total amount to cartItem
+    cartItem.amount = totalAmount;
     await cartItem.save();
     return res.status(200).json({
       status: true,
       message: 'Product added to cart successfully',
+      totalAmount: cartItem.amount,
     });
   } catch (error) {
     console.log(error);
@@ -362,7 +370,86 @@ exports.getCartItems = async (req, res) => {
       [
         {
           $match: {
-            userId: new ObjectId(userId),
+            userId: new ObjectId(
+              '65fd6194d6e851a95bb86536',
+            ),
+          },
+        },
+        {
+          $unwind: '$products',
+        },
+        {
+          $lookup: {
+            from: 'producttables',
+            localField: 'products.productId',
+            foreignField: '_id',
+            as: 'product',
+          },
+        },
+        {
+          $unwind: '$product',
+        },
+        {
+          $project: {
+            userId: 1,
+            productId: '$products.productId',
+            description: '$product.description',
+            quantity: '$products.quantity',
+            price: '$product.price',
+            stock: '$product.stock',
+            category: '$product.category',
+            size: '$product.size',
+            color: '$product.color',
+            availability: '$product.availability',
+            image: '$product.image',
+            offer: '$product.offer',
+            discountedPrice: '$product.discountedPrice',
+          },
+        },
+      ]
+      ,
+    );
+
+    return res.status(200).json({
+      status: true,
+      message: 'Cart items retrieved successfully',
+      cartItems: aggregateData,
+    });
+  } catch (error) {
+    console.log(error);
+    return handleError(res);
+  }
+};
+exports.get_singleCart = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const productId = req.params;
+    // console.log(userId);
+    const cartItem = await CartItem.findOne({ userId });
+    console.log(cartItem);
+    if (!cartItem) {
+      return res.status(404).json({
+        status: false,
+        message: 'Cart not found',
+      });
+    }
+    const aggregateData = await CartItem.aggregate(
+      [
+        {
+          $match: {
+            userId: new ObjectId(
+              userId,
+            ),
+          },
+        },
+        {
+          $unwind: '$products',
+        },
+        {
+          $match: {
+            'products.productId': new ObjectId(
+              productId,
+            ),
           },
         },
         {
@@ -370,31 +457,37 @@ exports.getCartItems = async (req, res) => {
             from: 'producttables',
             localField: 'products.productId',
             foreignField: '_id',
-            as: 'results',
+            as: 'product',
           },
         },
-      ],
+        {
+          $unwind: '$product',
+        },
+        {
+          $project: {
+            userId: 1,
+            productId: '$products.productId',
+            description: '$product.description',
+            quantity: '$products.quantity',
+            price: '$product.price',
+            stock: '$product.stock',
+            category: '$product.category',
+            size: '$product.size',
+            color: '$product.color',
+            availability: '$product.availability',
+            image: '$product.image',
+            offer: '$product.offer',
+            discountedPrice: '$product.discountedPrice',
+          },
+        },
+      ]
+      ,
     );
-    const cartQuantities = await CartItem.aggregate([
-      {
-        $match: {
-          userId: new ObjectId(userId),
-        },
-      },
-      {
-        $project: {
-          quantity: 'quantity',
-        },
-      },
-    ]);
-
-    console.log(cartQuantities);
 
     return res.status(200).json({
       status: true,
       message: 'Cart items retrieved successfully',
       cartItems: aggregateData,
-      cartQuantities: cartQuantities.length > 0 ? cartQuantities[0].totalQuantity : 0,
     });
   } catch (error) {
     console.log(error);
@@ -444,6 +537,25 @@ exports.deleteCart = async (req, res) => {
       status: false,
       message: 'Cart item not found',
     });
+  } catch (error) {
+    console.log(error);
+    return handleError(res);
+  }
+};
+exports.edit_cart = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const productId = req.params.id;
+    console.log(productId);
+    const updatecart = req.body;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
   } catch (error) {
     console.log(error);
     return handleError(res);
