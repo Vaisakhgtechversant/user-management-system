@@ -365,7 +365,7 @@ exports.getCartItems = async (req, res) => {
         {
           $match: {
             userId: new ObjectId(
-              '65fd6194d6e851a95bb86536',
+              userId,
             ),
           },
         },
@@ -519,6 +519,7 @@ exports.deleteCart = async (req, res) => {
   try {
     const userId = req.decodedId;
     const productId = req.params;
+    console.log(productId.id);
 
     const user = await userModel.findById(userId);
     if (!user) {
