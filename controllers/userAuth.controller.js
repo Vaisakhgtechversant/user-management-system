@@ -495,6 +495,9 @@ exports.get_singleCart = async (req, res) => {
             discountedPrice: '$product.discountedPrice',
           },
         },
+        {
+          $unwind: '$results',
+        },
       ]
       ,
     );
