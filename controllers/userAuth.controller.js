@@ -387,6 +387,7 @@ exports.getCartItems = async (req, res) => {
           $project: {
             userId: 1,
             productId: '$products.productId',
+            title: '$products.title',
             description: '$product.description',
             quantity: '$products.quantity',
             price: '$product.price',
@@ -481,6 +482,7 @@ exports.get_singleCart = async (req, res) => {
           $project: {
             userId: 1,
             productId: '$products.productId',
+            title: '$products.title',
             description: '$product.description',
             quantity: '$products.quantity',
             price: '$product.price',
