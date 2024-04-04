@@ -396,6 +396,7 @@ exports.getCartItems = async (req, res) => {
             description: '$product.description',
             quantity: '$products.quantity',
             price: '$product.price',
+            total_price: { $multiply: ['$products.quantity', '$product.discountedPrice'] },
             stock: '$product.stock',
             category: '$product.category',
             size: '$product.size',
@@ -413,7 +414,7 @@ exports.getCartItems = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: 'Cart items retrieved successfully',
-      cartItems: aggregateData,
+      results: aggregateData,
     });
   } catch (error) {
     console.log(error);
@@ -470,6 +471,7 @@ exports.get_singleCart = async (req, res) => {
             description: '$product.description',
             quantity: '$products.quantity',
             price: '$product.price',
+            total_price: { $multiply: ['$products.quantity', '$product.discountedPrice'] },
             stock: '$product.stock',
             category: '$product.category',
             size: '$product.size',
@@ -487,7 +489,7 @@ exports.get_singleCart = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: 'Cart items retrieved successfully',
-      cartItems: aggregateData,
+      result: aggregateData,
     });
   } catch (error) {
     console.log(error);
@@ -546,7 +548,6 @@ exports.edit_cart = async (req, res) => {
   try {
     const userId = req.decodedId;
     const productId = req.params.id;
-    console.log(productId);
     const updatecart = req.body;
 
     const user = await userModel.findById(userId);
@@ -556,9 +557,54 @@ exports.edit_cart = async (req, res) => {
         message: 'User not found',
       });
     }
+
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+    }
+
+    const cartItem = await CartItem.findOne({ userId });
+    if (!cartItem) {
+      return res.status(404).json({
+        status: false,
+        message: 'Cart item not found',
+      });
+    }
+
+    const result = cartItem.products.find((data) => String(data.productId) === productId);
+    if (!result) {
+      return res.status(404).json({
+        status: false,
+        message: 'Product not found in the cart',
+      });
+    }
+
+    await CartItem.updateOne({ userId, 'products.productId': productId }, { $set: { 'products.$.quantity': updatecart.quantity } });
+
+    let totalAmount = 0;
+    cartItem.products.forEach((item) => {
+      totalAmount += item.quantity * product.price;
+      console.log(totalAmount);
+    });
+    cartItem.amount = totalAmount;
+
+    await cartItem.save();
+
+    return res.status(200).json({
+      status: true,
+      message: 'Cart updated successfully',
+      data: cartItem,
+      totalAmount: cartItem.amount,
+    });
   } catch (error) {
     console.log(error);
-    return handleError(res);
+    return res.status(500).json({
+      status: false,
+      message: 'Internal server error',
+    });
   }
 };
 
