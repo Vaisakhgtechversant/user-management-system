@@ -332,18 +332,12 @@ exports.addToCart = async (req, res) => {
         quantity: 1,
       });
     }
-    let totalAmount = 0;
-    cartItem.products.forEach((item) => {
-      totalAmount += item.quantity * product.price; // Assuming price is in the product model
-    });
 
     // Assign total amount to cartItem
-    cartItem.amount = totalAmount;
     await cartItem.save();
     return res.status(200).json({
       status: true,
       message: 'Product added to cart successfully',
-      totalAmount: cartItem.amount,
     });
   } catch (error) {
     console.log(error);
@@ -396,7 +390,12 @@ exports.getCartItems = async (req, res) => {
             description: '$product.description',
             quantity: '$products.quantity',
             price: '$product.price',
-            total_price: { $multiply: ['$products.quantity', '$product.discountedPrice'] },
+            total_price: {
+              $multiply: [
+                '$products.quantity',
+                '$product.discountedPrice',
+              ],
+            },
             stock: '$product.stock',
             category: '$product.category',
             size: '$product.size',
@@ -405,6 +404,20 @@ exports.getCartItems = async (req, res) => {
             image: '$product.image',
             offer: '$product.offer',
             discountedPrice: '$product.discountedPrice',
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$total_price' },
+            results: { $push: '$$ROOT' },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            total: 1,
+            results: 1,
           },
         },
       ]
@@ -559,6 +572,7 @@ exports.edit_cart = async (req, res) => {
     }
 
     const product = await productModel.findById(productId);
+    console.log(product);
     if (!product) {
       return res.status(404).json({
         status: false,
@@ -581,23 +595,19 @@ exports.edit_cart = async (req, res) => {
         message: 'Product not found in the cart',
       });
     }
+    if (product.stock < updatecart.quantity) {
+      return res.status(400).json({
+        status: false,
+        message: 'out of stock',
+      });
+    }
 
     await CartItem.updateOne({ userId, 'products.productId': productId }, { $set: { 'products.$.quantity': updatecart.quantity } });
-
-    let totalAmount = 0;
-    cartItem.products.forEach((item) => {
-      totalAmount += item.quantity * product.price;
-      console.log(totalAmount);
-    });
-    cartItem.amount = totalAmount;
-
     await cartItem.save();
 
     return res.status(200).json({
       status: true,
-      message: 'Cart updated successfully',
-      data: cartItem,
-      totalAmount: cartItem.amount,
+      message: 'quantity updated successfully',
     });
   } catch (error) {
     console.log(error);
@@ -664,36 +674,6 @@ exports.addToWishlist = async (req, res) => {
     return handleError(res);
   }
 };
-
-// exports.getWishlist = async (req, res) => {
-//   try {
-//     const userId = req.decodedId;
-//     const user = await userModel.findById(userId);
-//     if (!user) {
-//       return res.status(404).json({
-//         status: false,
-//         message: 'data not found',
-//       });
-//     }
-//     const { page, limit } = req.query;
-//     const currentPage = parseInt(page, 10) || 1;
-//     const limitNumber = parseInt(limit, 10) || 10;
-//     const startIndex = (currentPage - 1) * limitNumber;
-//     const cartItemCount = user.wishlist.length;
-//     const paginatedCartItems = user.wishlist.slice(startIndex, startIndex + limitNumber);
-
-//     return res.status(200).json({
-//       status: true,
-//       message: 'Cart items retrieved successfully',
-//       currentPage,
-//       limit: limitNumber,
-//       totalCount: cartItemCount,
-//       wishlistItems: paginatedCartItems,
-//     });
-//   } catch (error) {
-//     return handleError(res);
-//   }
-// };
 
 exports.getWishlist = async (req, res) => {
   try {
