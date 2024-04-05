@@ -308,7 +308,7 @@ exports.addToCart = async (req, res) => {
       });
     }
     const product = await productModel.findById(productId);
-    console.log('product', product.title);
+    console.log('product', product);
     if (!product) {
       return res.status(404).json({
         status: false,
@@ -329,6 +329,7 @@ exports.addToCart = async (req, res) => {
       cartItem.products.push({
         productId: product._id,
         title: product.title,
+        price: product.price,
         quantity: 1,
       });
     }
@@ -496,9 +497,6 @@ exports.get_singleCart = async (req, res) => {
             offer: '$product.offer',
             discountedPrice: '$product.discountedPrice',
           },
-        },
-        {
-          $unwind: '$results',
         },
       ]
       ,

@@ -29,7 +29,8 @@ router.put('/update-cart/:id', verifyUser, userAuthController.edit_cart);
 router.get('/wishlist', verifyUser, userAuthController.getWishlist);
 router.delete('/delete-cart/:id', verifyUser, userAuthController.deleteCart);
 router.delete('/delete-wishist/:id', verifyUser, userAuthController.deleteWishlist);
-router.post('/order/:id', verifyUser, orderController.orderProduct);
-router.get('/get-order', verifyUser, orderController.get_order);
+router.post('/order', verifyUser, orderController.orderProduct);
+router.get('/my-order', verifyUser, orderController.my_order);
+router.get('/order-productlist', verifyUser, orderController.order_product_list);
 
 module.exports = router;

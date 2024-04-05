@@ -94,7 +94,6 @@ exports.edit_address = async (req, res) => {
     }
 
     const updatedAddressData = req.body;
-    console.log(updatedAddressData);
 
     const address = await AddressModel.findOneAndUpdate(
       { userId, 'address._id': new ObjectId(addressId) },
@@ -112,6 +111,7 @@ exports.edit_address = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: 'Address updated successfully',
+      address: address.address,
     });
   } catch (error) {
     console.log(error);

@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+
+const { ObjectId } = mongoose.Types;
 const OrderModel = require('../model/order.model');
 const userModel = require('../model/user.model');
 const cartModel = require('../model/cart.model');
@@ -25,27 +28,18 @@ exports.orderProduct = async (req, res) => {
       });
     }
     const cartItems = await cartModel.findOne({ userId });
-    console.log(cartItems);
+    console.log('cartItems', cartItems);
     if (!cartItems || cartItems.products.length === 0) {
       return res.status(404).json({
         status: false,
         message: 'No products found in the cart',
       });
     }
-    const amount = cartItems.products.reduce((acc, product) => {
-      if (product.price && product
-        .quantity && !Number.isNaN(product.price) && !Number.isNaN(product.quantity)) {
-        return acc + (parseFloat(product.price) * parseFloat(product.quantity));
-      }
-      console.error('Invalid product price or quantity:', product);
-      return acc;
-    }, 0);
 
     const order = new OrderModel({
       userId,
       products: cartItems.products,
       address: address.address,
-      amount,
     });
 
     await order.save();
@@ -59,7 +53,74 @@ exports.orderProduct = async (req, res) => {
   }
 };
 
-exports.get_order = async (req, res) => {
+exports.my_order = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const productId = req.params;
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+    const pipeline = [
+      {
+        $match: {
+          userId: new ObjectId(
+            userId,
+          ),
+        },
+      },
+      {
+        $lookup: {
+          from: 'producttables',
+          localField: 'products.productId',
+          foreignField: '_id',
+          as: 'product',
+        },
+      },
+      {
+        $unwind: '$product',
+      },
+      {
+        $lookup: {
+          from: 'addresstables',
+          localField: 'address.addressId',
+          foreignField: 'address.addressId',
+          as: 'address',
+        },
+      },
+      {
+        $unwind: '$address',
+      },
+      {
+        $project: {
+          userId: 1,
+          'address.address': 1,
+          product: 1,
+          status: 1,
+        },
+      },
+    ];
+    const data = await OrderModel.aggregate(pipeline);
+    if (data) {
+      return res.status(200).json({
+        status: true,
+        message: 'order data successfully',
+      });
+    }
+    return res.status(404).json({
+      status: false,
+      message: 'No orders found for the user',
+    });
+  } catch (error) {
+    console.log(error);
+    return handleError(res);
+  }
+};
+
+exports.order_product_list = async (req, res) => {
   try {
     const userId = req.decodedId;
     const user = await userModel.findById(userId);
@@ -69,12 +130,40 @@ exports.get_order = async (req, res) => {
         message: 'User not found',
       });
     }
-    const orders = await OrderModel.findOne({ userId });
-    if (orders) {
+    const pipeline = [
+      {
+        $match: {
+          userId: new ObjectId(
+            userId,
+          ),
+        },
+      },
+      {
+        $lookup: {
+          from: 'producttables',
+          localField: 'products.productId',
+          foreignField: '_id',
+          as: 'product',
+        },
+      },
+      {
+        $unwind: '$product',
+      },
+
+      {
+        $project: {
+          userId: 1,
+          product: 1,
+          status: 1,
+        },
+      },
+    ];
+    const data = await OrderModel.aggregate(pipeline);
+    if (data) {
       return res.status(200).json({
         status: true,
-        message: 'Orders retrieved successfully',
-        result: orders,
+        message: 'data retrived successfully',
+        results: data,
       });
     }
     return res.status(404).json({

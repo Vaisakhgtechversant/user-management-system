@@ -17,14 +17,11 @@ const orderModel = mongoose.Schema({
       require: true,
       type: String,
     },
-    quantity: {
+    price: {
       type: Number,
-      default: 1,
+      required: true,
     },
   }],
-  amount: {
-    type: Number,
-  },
   address: [{
     addressId: {
       type: mongoose.Schema.Types.ObjectId,
