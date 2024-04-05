@@ -53,7 +53,7 @@ exports.orderProduct = async (req, res) => {
   }
 };
 
-exports.my_order = async (req, res) => {
+exports.my_order_single = async (req, res) => {
   try {
     const userId = req.decodedId;
     const productId = req.params;
@@ -84,6 +84,13 @@ exports.my_order = async (req, res) => {
         $unwind: '$product',
       },
       {
+        $match: {
+          'product._id': new ObjectId(
+            productId,
+          ),
+        },
+      },
+      {
         $lookup: {
           from: 'addresstables',
           localField: 'address.addressId',
@@ -92,13 +99,10 @@ exports.my_order = async (req, res) => {
         },
       },
       {
-        $unwind: '$address',
-      },
-      {
         $project: {
-          userId: 1,
-          'address.address': 1,
           product: 1,
+          userId: 1,
+          'address.address.fullName': 1,
           status: 1,
         },
       },
@@ -108,6 +112,7 @@ exports.my_order = async (req, res) => {
       return res.status(200).json({
         status: true,
         message: 'order data successfully',
+        result: data,
       });
     }
     return res.status(404).json({

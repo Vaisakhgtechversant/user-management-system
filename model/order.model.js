@@ -17,10 +17,6 @@ const orderModel = mongoose.Schema({
       require: true,
       type: String,
     },
-    price: {
-      type: Number,
-      required: true,
-    },
   }],
   address: [{
     addressId: {

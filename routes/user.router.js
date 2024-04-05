@@ -30,7 +30,7 @@ router.get('/wishlist', verifyUser, userAuthController.getWishlist);
 router.delete('/delete-cart/:id', verifyUser, userAuthController.deleteCart);
 router.delete('/delete-wishist/:id', verifyUser, userAuthController.deleteWishlist);
 router.post('/order', verifyUser, orderController.orderProduct);
-router.get('/my-order', verifyUser, orderController.my_order);
+router.get('/my-order-single/:id', verifyUser, orderController.my_order_single);
 router.get('/order-productlist', verifyUser, orderController.order_product_list);
 
 module.exports = router;
