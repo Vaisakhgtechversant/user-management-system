@@ -44,7 +44,7 @@ const addressModel = mongoose.Schema({
       require: true,
       type: String,
     },
-    landMark: {
+    landmark: {
       require: true,
       type: String,
     },

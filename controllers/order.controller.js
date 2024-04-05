@@ -99,10 +99,17 @@ exports.my_order_single = async (req, res) => {
         },
       },
       {
+        $match: {
+          'address.userId': new ObjectId(
+            userId,
+          ),
+        },
+      },
+      {
         $project: {
           product: 1,
           userId: 1,
-          'address.address.fullName': 1,
+          address: 1,
           status: 1,
         },
       },
