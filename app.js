@@ -7,7 +7,7 @@ const userRouter = require('./routes/user.router');
 const imgRouter = require('./routes/img.router');
 const productRouter = require('./routes/products.router');
 const addressRouter = require('./routes/address.router');
-// const quantityRouter = require('./routes/quantity.router');
+const reviewRouter = require('./routes/review.router');
 
 dotenv.config();
 const server = express();
@@ -21,7 +21,7 @@ server.use('/api', adminRouter);
 server.use('/api', userRouter);
 server.use('/api', productRouter);
 server.use('/api', addressRouter);
-// server.use('/api', quantityRouter);
+server.use('/api', reviewRouter);
 
 server.use('/image', imgRouter);
 
