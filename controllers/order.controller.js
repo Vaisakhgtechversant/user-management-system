@@ -47,7 +47,8 @@ exports.orderProduct = async (req, res) => {
 
       await order.save();
     });
-    return res.status(201).json({
+    await cartModel.findOneAndDelete({ userId });
+    res.status(201).json({
       status: true,
       message: 'Order done',
     });
