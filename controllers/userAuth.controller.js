@@ -4,7 +4,7 @@ const { ObjectId } = mongoose.Types;
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
-const dotenv = require('dotenv');
+// const dotenv = require('dotenv');
 const userModel = require('../model/user.model');
 const userRegistrationSchema = require('../schemas/userRegistration.schema');
 const userUpdateSchema = require('../schemas/userupdate.schema');
@@ -14,7 +14,7 @@ const productModel = require('../model/products.model');
 const CartItem = require('../model/cart.model');
 const WishlistItem = require('../model/wishlist.model');
 
-dotenv.config();
+// dotenv.config();
 const { envtoken } = process.env;
 let newOtp = null;
 exports.addNewUser = async (req, res) => {
@@ -103,6 +103,7 @@ exports.updateUser = async (req, res) => {
     const id = req.decodedId;
     console.log('id', id);
     const updateUser = req.body;
+    console.log(updateUser);
     const { error } = userUpdateSchema.validate(updateUser);
     if (error) {
       const errorMessage = error.details[0].message.replace(/['"]+/g, '');
@@ -111,7 +112,9 @@ exports.updateUser = async (req, res) => {
         message: errorMessage,
       });
     }
+
     if (req.file) {
+      console.log(req.file);
       const imageBuffer = req.file.buffer;
       await userModel.updateOne({ _id: id }, { $set: { image: imageBuffer, ...updateUser } });
     } else {

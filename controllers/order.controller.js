@@ -12,6 +12,7 @@ const { handleError } = require('../utils/serverError');
 exports.orderProduct = async (req, res) => {
   try {
     const userId = req.decodedId;
+    const { addressId } = req.body;
 
     const user = await userModel.findById(userId);
     if (!user) {
@@ -39,7 +40,7 @@ exports.orderProduct = async (req, res) => {
     const order = new OrderModel({
       userId,
       products: cartItems.products,
-      address: address.address,
+      addressId,
     });
 
     await order.save();
@@ -93,36 +94,48 @@ exports.my_order_single = async (req, res) => {
       {
         $lookup: {
           from: 'addresstables',
-          localField: 'address.addressId',
-          foreignField: 'address.addressId',
-          as: 'address',
+          localField: 'userId',
+          foreignField: 'userId',
+          as: 'addressData',
         },
       },
       {
-        $unwind: '$address',
-      },
-      {
-        $match: {
-          'address.userId': new ObjectId(
-            userId,
-          ),
-        },
+        $unwind: '$addressData',
       },
       {
         $project: {
+          matchedAddress: {
+            $filter: {
+              input: '$addressData.address',
+              as: 'addressElem',
+              cond: {
+                $eq: [
+                  '$$addressElem._id',
+                  '$addressId',
+                ],
+              },
+            },
+          },
           product: 1,
           userId: 1,
-          address: 1,
           status: 1,
+          orderConfirmed: {
+            $dateToString: {
+              format: '%d-%b-%Y',
+              date: '$orderConfirmed',
+            },
+          },
         },
       },
+      { $unwind: '$matchedAddress' },
     ];
     const data = await OrderModel.aggregate(pipeline);
+    console.log(data);
     if (data) {
       return res.status(200).json({
         status: true,
-        message: 'order data successfully',
-        result: data,
+        message: 'data retrived ',
+        results: data,
       });
     }
     return res.status(404).json({

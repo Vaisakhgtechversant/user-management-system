@@ -68,18 +68,35 @@ exports.editProductReview = async (req, res) => {
     }
     const updatedReview = req.body;
 
-    const result = await ReviewModel
-      .updateOne({ userId, 'reviews._id': new ObjectId(productId) }, { $set: { 'reviews.$': updatedReview } });
-    console.log(result);
-    if (!result) {
+    const updateObject = {};
+    if (updatedReview.rating !== null && updatedReview.rating !== undefined) {
+      updateObject['reviews.$.rating'] = updatedReview.rating;
+    }
+    if (updatedReview.comment !== null && updatedReview.comment !== undefined) {
+      updateObject['reviews.$.comment'] = updatedReview.comment;
+    }
+
+    if (Object.keys(updateObject).length > 0) {
+      const result = await ReviewModel.updateOne(
+        { userId, 'reviews._id': new ObjectId(productId) },
+        { $set: updateObject },
+      );
+
+      console.log(result);
+      if (!result) {
+        return res.status(200).json({
+          status: true,
+          message: 'result not found',
+        });
+      }
       return res.status(200).json({
         status: true,
-        message: 'result not found',
+        message: 'Review updated successfully',
       });
     }
-    return res.status(200).json({
-      status: true,
-      message: 'Review updated successfully',
+    return res.status(400).json({
+      status: false,
+      message: 'No updates were made',
     });
   } catch (error) {
     console.error(error);
@@ -107,7 +124,7 @@ exports.getReview = async (req, res) => {
   ];
   const value = await ReviewModel.aggregate(pipeline);
   if (value) {
-    return res.status(200).json({
+    res.status(200).json({
       status: true,
       message: 'address retrieved successfully',
       result: value,

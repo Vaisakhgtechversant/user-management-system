@@ -18,16 +18,21 @@ const orderModel = mongoose.Schema({
       type: String,
     },
   }],
-  address: [{
-    addressId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'addresstable',
-    },
+  addressId: {
+    type: mongoose.Schema.Types.ObjectId,
   },
-  ],
+
   status: {
     type: String,
     default: 'pending',
+  },
+  orderConfirmed: {
+    type: Date,
+    default: Date.now,
+  },
+  delivered: {
+    type: Date,
+    default: null,
   },
 });
 module.exports = mongoose.model('ordertable', orderModel);

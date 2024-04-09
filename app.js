@@ -10,6 +10,7 @@ const addressRouter = require('./routes/address.router');
 const reviewRouter = require('./routes/review.router');
 
 dotenv.config();
+
 const server = express();
 server.use(bodyParser.json());
 server.use(cors());
