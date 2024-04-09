@@ -5,6 +5,7 @@ const OrderModel = require('../model/order.model');
 const userModel = require('../model/user.model');
 const cartModel = require('../model/cart.model');
 const addressModel = require('../model/address.model');
+const productModel = require('../model/products.model');
 
 // const productModel = require('../model/products.model');
 const { handleError } = require('../utils/serverError');
@@ -46,6 +47,48 @@ exports.orderProduct = async (req, res) => {
 
       await order.save();
     });
+    return res.status(201).json({
+      status: true,
+      message: 'Order done',
+    });
+  } catch (error) {
+    console.log(error);
+    return handleError(res);
+  }
+};
+exports.orderSingleProduct = async (req, res) => {
+  try {
+    const userId = req.decodedId;
+    const productId = req.params.id;
+    console.log('productId', productId);
+    const { addressId } = req.body;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+    const address = await addressModel.findOne({ userId });
+    if (!address) {
+      return res.status(404).json({
+        status: false,
+        message: 'Address not found for the user',
+      });
+    }
+
+    const singleProduct = await productModel.findById(productId);
+    console.log('hi');
+
+    console.log('singleProduct', singleProduct);
+    const order = new OrderModel({
+      userId,
+      products: singleProduct,
+      addressId,
+    });
+
+    await order.save();
     return res.status(201).json({
       status: true,
       message: 'Order done',
