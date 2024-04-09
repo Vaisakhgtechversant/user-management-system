@@ -37,13 +37,15 @@ exports.orderProduct = async (req, res) => {
       });
     }
 
-    const order = new OrderModel({
-      userId,
-      products: cartItems.products,
-      addressId,
-    });
+    cartItems.products.forEach(async (element) => {
+      const order = new OrderModel({
+        userId,
+        products: element,
+        addressId,
+      });
 
-    await order.save();
+      await order.save();
+    });
     return res.status(201).json({
       status: true,
       message: 'Order done',

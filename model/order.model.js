@@ -8,7 +8,7 @@ const orderModel = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'usertable',
   },
-  products: [{
+  products: {
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'producttable',
@@ -17,7 +17,7 @@ const orderModel = mongoose.Schema({
       require: true,
       type: String,
     },
-  }],
+  },
   addressId: {
     type: mongoose.Schema.Types.ObjectId,
   },
