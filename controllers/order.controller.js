@@ -216,7 +216,7 @@ exports.order_product_list = async (req, res) => {
         $lookup: {
           from: 'producttables',
           localField: 'products.productId',
-          foreignField: 'id',
+          foreignField: '_id',
           as: 'product',
         },
       },
