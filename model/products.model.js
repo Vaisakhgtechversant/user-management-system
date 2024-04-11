@@ -8,7 +8,6 @@ const productModel = mongoose.Schema({
     require: true,
     type: String,
   },
-
   title: {
     require: true,
     type: String,

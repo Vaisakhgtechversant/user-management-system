@@ -11,7 +11,6 @@ const orderModel = mongoose.Schema({
   products: {
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'producttable',
     },
     title: {
       require: true,

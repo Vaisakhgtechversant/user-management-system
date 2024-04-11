@@ -106,7 +106,6 @@ exports.updateUser = async (req, res) => {
     const updateUser = req.body;
     console.log('updateUser', updateUser);
 
-    // Validate the update user data
     const { error } = userUpdateSchema.validate(updateUser);
     if (error) {
       const errorMessage = error.details[0].message.replace(/['"]+/g, '');
@@ -116,16 +115,14 @@ exports.updateUser = async (req, res) => {
       });
     }
 
-    const updateObject = updateUser; // Object to store update fields
+    const updateObject = updateUser;
 
-    // Check if there's a file attached
     if (req.file) {
       console.log('req.file');
       const imageBuffer = req.file.buffer;
-      updateObject.image = imageBuffer; // Add image to updateObject
+      updateObject.image = imageBuffer;
     }
 
-    // Update user in the database
     await userModel.updateOne({ _id: id }, { $set: updateObject });
 
     return res.status(200).json({

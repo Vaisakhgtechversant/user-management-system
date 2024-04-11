@@ -78,17 +78,14 @@ exports.orderSingleProduct = async (req, res) => {
         message: 'Address not found for the user',
       });
     }
-
     const singleProduct = await productModel.findById(productId);
-    console.log('hi');
-
     console.log('singleProduct', singleProduct);
+
     const order = new OrderModel({
       userId,
       products: singleProduct,
       addressId,
     });
-
     await order.save();
     return res.status(201).json({
       status: true,
