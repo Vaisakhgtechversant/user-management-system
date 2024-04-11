@@ -22,11 +22,12 @@ module.exports = Joi.object({
   stock: Joi.string()
     .pattern(/^[0-9 ]+$/).message('only allow numbers')
     .min(1),
-  imageURL: Joi.string(),
+  image: Joi.string(),
   color: Joi.string()
     .pattern(/^[a-zA-Z ]+$/).message('only allow letter').min(3),
   offer: Joi.string()
-    .pattern(/^[0-9 ]+$/).message('only allow numbers').min(1),
+    .pattern(/^[0-9 ]+$/).message('only allow numbers').min(1)
+    .required(),
   size: Joi.string()
     .pattern(/^[0-9 ]+$/).message('only allow numbers').min(1),
   discountedPrice: Joi.string(),

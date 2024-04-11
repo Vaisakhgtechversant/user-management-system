@@ -102,8 +102,11 @@ exports.updateUser = async (req, res) => {
   try {
     const id = req.decodedId;
     console.log('id', id);
+
     const updateUser = req.body;
-    console.log(updateUser);
+    console.log('updateUser', updateUser);
+
+    // Validate the update user data
     const { error } = userUpdateSchema.validate(updateUser);
     if (error) {
       const errorMessage = error.details[0].message.replace(/['"]+/g, '');
@@ -113,18 +116,24 @@ exports.updateUser = async (req, res) => {
       });
     }
 
+    const updateObject = updateUser; // Object to store update fields
+
+    // Check if there's a file attached
     if (req.file) {
-      console.log(req.file);
+      console.log('req.file');
       const imageBuffer = req.file.buffer;
-      await userModel.updateOne({ _id: id }, { $set: { image: imageBuffer, ...updateUser } });
-    } else {
-      await userModel.updateOne({ _id: id }, { $set: updateUser });
+      updateObject.image = imageBuffer; // Add image to updateObject
     }
+
+    // Update user in the database
+    await userModel.updateOne({ _id: id }, { $set: updateObject });
+
     return res.status(200).json({
-      status: 'true',
-      message: 'updated',
+      status: true,
+      message: 'User updated successfully',
     });
   } catch (error) {
+    console.log(error);
     return handleError(res);
   }
 };
@@ -629,7 +638,6 @@ exports.addToWishlist = async (req, res) => {
   try {
     const userId = req.decodedId;
     const { productId } = req.params;
-    const { isWishlisted } = req.body;
 
     const user = await userModel.findById(userId);
     if (!user) {

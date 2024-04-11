@@ -16,7 +16,7 @@ const upload = multer({
     files: 2, // Limiting to two files
   },
 });
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   res.status(400).json({ error: err.message });
 };
 

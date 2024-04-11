@@ -48,7 +48,7 @@ exports.orderProduct = async (req, res) => {
       await order.save();
     });
     await cartModel.findOneAndDelete({ userId });
-    res.status(201).json({
+    return res.status(201).json({
       status: true,
       message: 'Order done',
     });
@@ -216,7 +216,7 @@ exports.order_product_list = async (req, res) => {
         $lookup: {
           from: 'producttables',
           localField: 'products.productId',
-          foreignField: '_id',
+          foreignField: 'id',
           as: 'product',
         },
       },
