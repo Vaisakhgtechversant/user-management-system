@@ -26,13 +26,13 @@ exports.addProductReview = async (req, res) => {
       });
     }
     let reviewData = await ReviewModel.findOne({ userId });
-    console.log('reviewData', reviewData.reviews);
+    console.log('reviewData', reviewData);
     if (!reviewData) {
       reviewData = new ReviewModel({ userId, reviews: [] });
     }
     const existingItem = reviewData.reviews.find((item) => item
-      .productId === productId);
-    console.log(existingItem);
+      .productId.toString() === productId);
+    console.log('existingItem', existingItem);
     if (existingItem) {
       return res.status(400).json({
         status: false,
@@ -54,7 +54,6 @@ exports.addProductReview = async (req, res) => {
     return handleError(res);
   }
 };
-
 exports.editProductReview = async (req, res) => {
   try {
     const userId = req.decodedId;

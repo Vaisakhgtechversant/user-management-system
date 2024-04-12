@@ -79,11 +79,12 @@ exports.orderSingleProduct = async (req, res) => {
       });
     }
     const singleProduct = await productModel.findById(productId);
+    singleProduct.productId = 1;
     console.log('singleProduct', singleProduct);
 
     const order = new OrderModel({
       userId,
-      products: singleProduct,
+      products: { productId: singleProduct._id, title: singleProduct.title },
       addressId,
     });
     await order.save();
