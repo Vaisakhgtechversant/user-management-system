@@ -692,35 +692,34 @@ exports.getWishlist = async (req, res) => {
     let status = false;
     let aggregateData;
     if (!wishlistitem) {
-      res.status(404).json({
+      return res.status(404).json({
         status: false,
         message: 'wishlist not found',
       });
-    } else {
-      status = true;
-      aggregateData = await WishlistItem.aggregate([
-        {
-          $match: { userId: new ObjectId(userId) },
-        },
-        {
-          $lookup: {
-            from: 'producttables',
-            localField: 'products.productId',
-            foreignField: '_id',
-            as: 'results',
-          },
-        },
-        {
-          $addFields: {
-            status: status.toString(),
-          },
-        },
-      ]);
     }
+    status = true;
+    aggregateData = await WishlistItem.aggregate([
+      {
+        $match: { userId: new ObjectId(userId) },
+      },
+      {
+        $lookup: {
+          from: 'producttables',
+          localField: 'products.productId',
+          foreignField: '_id',
+          as: 'results',
+        },
+      },
+      {
+        $addFields: {
+          status: status.toString(),
+        },
+      },
+    ]);
     return res.status(200).json({
       status: true,
       message: 'wishlist items retrieved successfully',
-      result: aggregateData, // Returning aggregateData outside the else block
+      result: aggregateData,
     });
   } catch (error) {
     console.log(error);
