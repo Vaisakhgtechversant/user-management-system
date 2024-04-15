@@ -117,11 +117,9 @@ exports.updateUser = async (req, res) => {
 
     const updateObject = updateUser;
 
-    if (req.file) {
-      console.log('req.file');
-      const imageBuffer = req.file.buffer;
-      updateObject.image = imageBuffer;
-    }
+    console.log('req.file');
+    const imageBuffer = req.file.buffer;
+    updateObject.image = imageBuffer;
 
     await userModel.updateOne({ _id: id }, { $set: updateObject });
 

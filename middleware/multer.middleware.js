@@ -29,8 +29,18 @@ const handleUpload = (fieldName) => (req, res, next) => {
   });
 };
 
+const handleSingleUpload = (fieldName) => (req, res, next) => {
+  upload.single(fieldName)(req, res, (err) => {
+    if (err) {
+      errorHandler(err, req, res, next);
+    }
+    next();
+  });
+};
+
 const UploadImage = handleUpload('image');
+const userUploadImage = handleSingleUpload('image');
 
 module.exports = {
-  UploadImage,
+  UploadImage, userUploadImage,
 };

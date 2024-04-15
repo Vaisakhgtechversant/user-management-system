@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://vaisakhg:lEqDyxySDVok6TSI@ums-db.cvc11dl.mongodb.net/?retryWrites=true&w=majority');
+mongoose.connect('mongodb://localhost:27017/ums');
 
 const addressModel = mongoose.Schema({
 
