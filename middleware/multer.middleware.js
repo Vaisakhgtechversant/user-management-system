@@ -13,7 +13,7 @@ const upload = multer({
     }
   },
   limits: {
-    files: 2, // Limiting to two files
+    files: 2,
   },
 });
 const errorHandler = (err, req, res) => {
@@ -28,8 +28,8 @@ const handleUpload = (fieldName) => (req, res, next) => {
     next();
   });
 };
-
 const handleSingleUpload = (fieldName) => (req, res, next) => {
+  console.log('fieldName', fieldName);
   upload.single(fieldName)(req, res, (err) => {
     if (err) {
       errorHandler(err, req, res, next);

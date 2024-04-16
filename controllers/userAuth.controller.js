@@ -102,10 +102,7 @@ exports.updateUser = async (req, res) => {
   try {
     const id = req.decodedId;
     console.log('id', id);
-
     const updateUser = req.body;
-    console.log('updateUser', updateUser);
-
     const { error } = userUpdateSchema.validate(updateUser);
     if (error) {
       const errorMessage = error.details[0].message.replace(/['"]+/g, '');
@@ -114,21 +111,17 @@ exports.updateUser = async (req, res) => {
         message: errorMessage,
       });
     }
-
-    const updateObject = updateUser;
-
-    console.log('req.file');
-    const imageBuffer = req.file.buffer;
-    updateObject.image = imageBuffer;
-
-    await userModel.updateOne({ _id: id }, { $set: updateObject });
-
+    if (req.file) {
+      const imageBuffer = req.file.buffer;
+      await userModel.updateOne({ _id: id }, { $set: { image: imageBuffer, ...updateUser } });
+    } else {
+      await userModel.updateOne({ _id: id }, { $set: updateUser });
+    }
     return res.status(200).json({
-      status: true,
-      message: 'User updated successfully',
+      status: 'true',
+      message: 'updated',
     });
   } catch (error) {
-    console.log(error);
     return handleError(res);
   }
 };
@@ -341,7 +334,6 @@ exports.addToCart = async (req, res) => {
       });
     }
 
-    // Assign total amount to cartItem
     await cartItem.save();
     return res.status(200).json({
       status: true,
@@ -363,8 +355,8 @@ exports.getCartItems = async (req, res) => {
     const cartItem = await CartItem.findOne({ userId });
     console.log(cartItem);
     if (!cartItem) {
-      return res.status(404).json({
-        status: false,
+      return res.status(200).json({
+        status: true,
         message: 'Cart not found',
       });
     }
@@ -551,7 +543,6 @@ exports.deleteCart = async (req, res) => {
         },
       },
     );
-    // console.log(data);
 
     if (data) {
       return res.status(200).json({
@@ -690,15 +681,14 @@ exports.getWishlist = async (req, res) => {
     const userId = req.decodedId;
     const wishlistitem = await WishlistItem.findOne({ userId });
     let status = false;
-    let aggregateData;
     if (!wishlistitem) {
-      return res.status(404).json({
-        status: false,
+      return res.status(200).json({
+        status: true,
         message: 'wishlist not found',
       });
     }
     status = true;
-    aggregateData = await WishlistItem.aggregate([
+    const aggregateData = await WishlistItem.aggregate([
       {
         $match: { userId: new ObjectId(userId) },
       },
@@ -730,10 +720,9 @@ exports.getWishlist = async (req, res) => {
 exports.deleteWishlist = async (req, res) => {
   try {
     const userId = req.decodedId;
-    const productId = req.params; // Access cartId correctly
+    const productId = req.params;
 
     const user = await userModel.findById(userId);
-    // console.log(user);
     if (!user) {
       return res.status(404).json({
         status: false,

@@ -3,18 +3,16 @@ const dotenv = require('dotenv');
 const userModel = require('../model/user.model');
 
 dotenv.config();
-
 exports.verifyAdmin = (req, res, next) => {
   try {
     const { envtoken } = process.env;
     const token = req.headers.authorization;
-
     if (token) {
       try {
         const decodedId = jwt.verify(token, envtoken);
-        const adminData = userModel.findOne({ id: decodedId.id });
-
-        if (adminData) {
+        req.decodedId = decodedId.id;
+        const verifyData = userModel.findOne({ id: decodedId.id });
+        if (verifyData) {
           next();
         } else {
           res.status(400).send('User not found');

@@ -79,7 +79,6 @@ exports.orderSingleProduct = async (req, res) => {
       });
     }
     const singleProduct = await productModel.findById(productId);
-    singleProduct.productId = 1;
     console.log('singleProduct', singleProduct);
 
     const order = new OrderModel({
@@ -174,7 +173,7 @@ exports.my_order_single = async (req, res) => {
       { $unwind: '$matchedAddress' },
     ];
     const data = await OrderModel.aggregate(pipeline);
-    console.log(data);
+    console.log('data', data);
     if (data) {
       return res.status(200).json({
         status: true,

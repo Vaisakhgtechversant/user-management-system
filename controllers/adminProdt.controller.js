@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+
+const { ObjectId } = mongoose.Types;
 const productModel = require('../model/products.model');
 const productSchema = require('../schemas/products.schemas');
 
@@ -11,7 +14,10 @@ exports.addProduct = async (req, res) => {
         message: errorMessage,
       });
     }
-    const images = req.files; // req.files contains an array of uploaded files
+    console.log('req.files', req.files);
+
+    const images = req.files;
+
     const imageBuffers = images.map((image) => image.buffer);
     const {
       title, description,
@@ -106,10 +112,11 @@ exports.singleProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.decodedId;
+    const productId = req.params;
     const updateUser = req.body;
-    console.log(updateUser);
-    const { error } = productSchema.validate(updateUser);
+
+    const { error } = productSchema.validate(req.body);
     if (error) {
       const errorMessage = error.details[0].message.replace(/['"]+/g, '');
       return res.status(400).json({
@@ -119,21 +126,16 @@ exports.updateProduct = async (req, res) => {
     }
     const images = req.files;
     const imageBuffers = images.map((image) => image.buffer);
-    const updateData = { ...updateUser };
-    if ('price' in updateUser || 'offer' in updateUser) {
-      const { price, offer } = updateUser;
-      updateData.discountedPrice = price - (price * (offer / 100));
-    }
     if (imageBuffers) {
-      updateData.image = imageBuffers;
+      updateUser.image = imageBuffers;
     }
-    const result = await productModel.updateOne({ _id: userId }, { $set: updateData });
+    const result = await productModel
+      .updateOne({ _id: userId, _id: new ObjectId(productId) }, { $set: updateUser });
     console.log(result);
     if (result) {
       return res.status(200).json({
         status: true,
         message: 'product updated Successfully',
-        data: result,
       });
     }
     return res.status(200).json({

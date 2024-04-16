@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const userModel = require('../model/user.model');
 const loginSchema = require('../schemas/login.schema');
+const checkPassword = require('../utils/checkPassword');
 
 dotenv.config();
 const { envtoken, REFRESH_TOKEN_SECRET } = process.env;
@@ -13,7 +14,9 @@ exports.login = async (req, res) => {
     }
     const { email, password } = req.body;
     const result = await userModel.findOne({ email });
-    if (result && result.password === password) {
+
+    const same = await checkPassword(password, result.password);
+    if (same) {
       const { _id, name, role } = result;
       const token = jwt.sign({
         id: _id, name, role, password,
