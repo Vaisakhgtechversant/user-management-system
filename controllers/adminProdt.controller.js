@@ -114,7 +114,6 @@ exports.updateProduct = async (req, res) => {
   try {
     const userId = req.decodedId;
     const productId = req.params;
-    const updateUser = req.body;
 
     const { error } = productSchema.validate(req.body);
     if (error) {
@@ -126,8 +125,13 @@ exports.updateProduct = async (req, res) => {
     }
     const images = req.files;
     const imageBuffers = images.map((image) => image.buffer);
-    if (imageBuffers) {
+    const updateUser = req.body;
+    if (imageBuffers.length !== 0) {
       updateUser.image = imageBuffers;
+    }
+    const updateObject = {};
+    if (updateUser.image !== null && updateUser.image !== undefined) {
+      updateObject['$.image'] = updateUser.image;
     }
     const result = await productModel
       .updateOne({ _id: userId, _id: new ObjectId(productId) }, { $set: updateUser });
